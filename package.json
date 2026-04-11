@@ -36,7 +36,7 @@
     "format:check": "pnpm exec biome check .",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "publish:packages": "pnpm -r --filter @exit-zero-labs/httpi --filter @exit-zero-labs/httpi-mcp publish --report-summary",
+    "publish:packages": "node ./scripts/publish-packages.mjs",
     "release": "pnpm check && pnpm test && pnpm publish:packages",
     "test": "pnpm build && node --test testing/httpi/httpi.e2e.test.mjs testing/httpi/httpi.unit.test.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm build"

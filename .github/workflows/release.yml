@@ -18,8 +18,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
 
     steps:
       - name: Check out repository
@@ -35,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: ".node-version"
+          node-version: "24"
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
 
@@ -43,25 +41,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create release PR or publish packages
-        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
-        id: changesets
         uses: changesets/action@v1
         with:
           publish: pnpm release
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create release PR
-        if: ${{ env.HAS_NPM_TOKEN != 'true' }}
-        uses: changesets/action@v1
-        with:
-          createGithubReleases: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Note missing npm token
-        if: ${{ env.HAS_NPM_TOKEN != 'true' }}
-        run: |
-          echo "NPM_TOKEN is not configured, so this workflow can open or update the release PR but will not publish packages until the secret is added." >> "$GITHUB_STEP_SUMMARY"

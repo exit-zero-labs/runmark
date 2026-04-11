@@ -68,11 +68,11 @@ For changes that should ship to npm:
 1. run `pnpm changeset` and describe the user-visible package change
 2. merge the PR to `main`
 3. let `.github/workflows/release.yml` open or update the Changesets release PR
-4. merge that release PR to publish the new package versions once `NPM_TOKEN` is configured
+4. merge that release PR to publish the new package versions through npm trusted publishing
 
 Only `@exit-zero-labs/httpi` and `@exit-zero-labs/httpi-mcp` are published to npm. The shared `packages/*` workspace modules stay private implementation detail packages.
 
-Repository maintainers need an `NPM_TOKEN` GitHub Actions secret with publish access to the `@exit-zero-labs` npm organization before the release workflow can publish packages. Without it, the workflow still opens or updates the release PR and a later `workflow_dispatch` run can publish once the secret is in place.
+Repository maintainers need npm trusted publishers configured for both `@exit-zero-labs/httpi` and `@exit-zero-labs/httpi-mcp` to point at the `release.yml` workflow in `exit-zero-labs/httpi`. The release workflow uses GitHub OIDC on Node 24 so npm can mint publish credentials at runtime without a long-lived repository secret.
 
 ## Commits
 

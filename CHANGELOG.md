@@ -6,6 +6,7 @@ This changelog tracks user-visible changes for the current `0.1.x` line.
 
 - prepare scoped npm publishing for the `@exit-zero-labs/httpi` CLI and `@exit-zero-labs/httpi-mcp` adapter with Changesets-based release automation
 - keep the shared engine workspace packages private while publishing standalone CLI and MCP install surfaces
+- switch npm publishing from repository tokens to GitHub Actions trusted publishing via OIDC
 
 ## 0.1.0
 

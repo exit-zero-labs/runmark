@@ -71,7 +71,7 @@ const publishManifest = {
   publishConfig: {
     access: packageJson.publishConfig?.access ?? "public",
   },
-  repository: packageJson.repository,
+  repository: normalizeRepository(packageJson.repository),
   type: packageJson.type,
   version: packageJson.version,
 };
@@ -153,6 +153,28 @@ async function loadWorkspacePackages(repositoryRoot) {
   }
 
   return workspacePackages;
+}
+
+function normalizeRepository(repository) {
+  if (!repository) {
+    return undefined;
+  }
+
+  if (typeof repository === "string") {
+    return normalizeRepositoryUrl(repository);
+  }
+
+  return {
+    ...repository,
+    url:
+      typeof repository.url === "string"
+        ? normalizeRepositoryUrl(repository.url)
+        : repository.url,
+  };
+}
+
+function normalizeRepositoryUrl(url) {
+  return url.startsWith("git+") ? url : `git+${url}`;
 }
 
 function withoutUndefined(value) {
