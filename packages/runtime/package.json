@@ -1,5 +1,6 @@
 {
   "name": "@exit-zero-labs/httpi-runtime",
+  "private": true,
   "version": "0.1.0",
   "description": "Runtime persistence for httpi.",
   "type": "module",
@@ -29,9 +30,6 @@
     "url": "https://github.com/exit-zero-labs/httpi/issues"
   },
   "homepage": "https://github.com/exit-zero-labs/httpi#readme",
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "pnpm exec tsc -p tsconfig.json",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit"

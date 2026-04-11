@@ -69,11 +69,12 @@ pnpm check
 
 ## Install from npm
 
-The published npm packages use the `@exit-zero-labs/*` scope:
+The public npm install surface is intentionally small:
 
 - `@exit-zero-labs/httpi` - CLI package with the `httpi` binary
 - `@exit-zero-labs/httpi-mcp` - MCP stdio adapter with the `httpi-mcp` binary
-- `@exit-zero-labs/httpi-contracts`, `@exit-zero-labs/httpi-definitions`, `@exit-zero-labs/httpi-execution`, `@exit-zero-labs/httpi-http`, `@exit-zero-labs/httpi-runtime`, and `@exit-zero-labs/httpi-shared` - shared engine packages
+
+The shared engine packages remain internal workspace implementation details and are not meant to be installed directly.
 
 Install the CLI globally with:
 

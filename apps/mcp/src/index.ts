@@ -17,6 +17,7 @@ import {
   validateProject,
 } from "@exit-zero-labs/httpi-execution";
 import { coerceErrorMessage, exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+import packageJson from "../package.json" with { type: "json" };
 
 const flatValueSchema = z.union([
   z.string(),
@@ -39,7 +40,7 @@ const executionOptionsSchema = {
 export function createMcpServer(): McpServer {
   const server = new McpServer({
     name: "httpi",
-    version: "0.1.0",
+    version: packageJson.version,
   });
 
   server.registerTool(

@@ -5,18 +5,15 @@
   "fixed": [
     [
       "@exit-zero-labs/httpi",
-      "@exit-zero-labs/httpi-mcp",
-      "@exit-zero-labs/httpi-contracts",
-      "@exit-zero-labs/httpi-definitions",
-      "@exit-zero-labs/httpi-execution",
-      "@exit-zero-labs/httpi-http",
-      "@exit-zero-labs/httpi-runtime",
-      "@exit-zero-labs/httpi-shared"
+      "@exit-zero-labs/httpi-mcp"
     ]
   ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  }
 }

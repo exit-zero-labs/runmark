@@ -1,6 +1,6 @@
 {
   "name": "@exit-zero-labs/httpi-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP entrypoint for httpi.",
   "type": "module",
   "license": "MIT",
@@ -33,17 +33,18 @@
   },
   "homepage": "https://github.com/exit-zero-labs/httpi#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "publish"
   },
   "scripts": {
-    "build": "pnpm exec tsc -p tsconfig.json",
+    "build": "pnpm exec tsc -p tsconfig.json && node ../../scripts/build-published-app.mjs apps/mcp",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@exit-zero-labs/httpi-contracts": "workspace:*",
     "@exit-zero-labs/httpi-execution": "workspace:*",
     "@exit-zero-labs/httpi-shared": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "yaml": "^2.8.3",
     "zod": "^4.3.6"
   }
 }
