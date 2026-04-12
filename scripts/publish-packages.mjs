@@ -47,6 +47,13 @@ for (const publishPackage of publishPackages) {
   }
 }
 
+if (isDryRun) {
+  // npm pack --dry-run already validated each package above. Skipping
+  // `npm publish --dry-run` avoids the registry round-trip that rejects
+  // already-published versions in CI.
+  process.exit(0);
+}
+
 for (const publishPackage of publishPackages) {
   try {
     await runCommand("npm", ["publish", "--access", "public", ...extraArgs], {

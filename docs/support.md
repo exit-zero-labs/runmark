@@ -35,6 +35,25 @@ Donations are intended to fund work that keeps the project usable and maintained
 - **GitHub Sponsors:** primary recurring support path
 - **Open Collective:** secondary path for one-time support and public budget visibility
 
+## Donation metrics
+
+Track a small set of support metrics and review them before changing copy or adding more donation entrypoints.
+
+| Metric | Definition | Source |
+| --- | --- | --- |
+| Active recurring sponsors | Count of active GitHub Sponsors subscriptions at month end | GitHub Sponsors dashboard |
+| Monthly recurring support | Total monthly recurring amount from GitHub Sponsors | GitHub Sponsors dashboard |
+| One-time donations | Contributions received through Open Collective that are not recurring | Open Collective contributions / transactions |
+| New donors | Unique first-time supporters across GitHub Sponsors and Open Collective for the month | Platform exports or a manual monthly rollup |
+| Support surface attribution | Which surface drove the donor: repo README, package README, issue template, or support doc | Platform referrers if available; otherwise add a dedicated redirect or tagged-link layer before optimizing copy around source data |
+
+## Review cadence
+
+- review support metrics once per month, not per release or per commit
+- keep one lightweight log with month, active sponsors, recurring total, one-time total, new donors, and notable changes
+- do not add CLI telemetry or runtime donation prompts just to collect support analytics
+- only change support copy when the metrics show a discovery problem or a clearly stronger surface
+
 ## Planned follow-up
 
 1. keep the Open Collective page aligned with the repo support copy and funding purpose
