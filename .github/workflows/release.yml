@@ -42,11 +42,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate (lint, typecheck, build, tests)
-        run: |
-          pnpm check
-          pnpm test
-
+      # Version bump MUST run before build so the tarball bakes in the bumped
+      # version. Previously validate ran first and baked the pre-bump version
+      # into apps/cli/publish, which then shipped the stale version to npm.
       - name: Apply pending changesets (version bump + commit + push)
         id: version
         run: |
@@ -72,6 +70,11 @@ jobs:
           git commit -m "chore(release): version packages"
           git push origin HEAD:main
           echo "bumped=true" >> "$GITHUB_OUTPUT"
+
+      - name: Validate (lint, typecheck, build, tests)
+        run: |
+          pnpm check
+          pnpm test
 
       - name: Publish unpublished package versions to npm
         env:
