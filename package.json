@@ -1,5 +1,5 @@
 {
-  "name": "httpi",
+  "name": "runmark",
   "private": true,
   "version": "0.3.0",
   "description": "Open-source file-based HTTP workflows for humans and AI agents.",
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/exit-zero-labs/httpi.git"
+    "url": "https://github.com/exit-zero-labs/runmark.git"
   },
   "bugs": {
-    "url": "https://github.com/exit-zero-labs/httpi/issues"
+    "url": "https://github.com/exit-zero-labs/runmark/issues"
   },
-  "homepage": "https://github.com/exit-zero-labs/httpi",
+  "homepage": "https://github.com/exit-zero-labs/runmark",
   "keywords": [
     "http",
     "cli",
@@ -38,7 +38,7 @@
     "version-packages": "changeset version",
     "publish:packages": "node ./scripts/publish-packages.mjs",
     "release": "pnpm version-packages && pnpm check && pnpm test && pnpm publish:packages",
-    "test": "pnpm build && node --test testing/httpi/httpi.e2e.test.mjs testing/httpi/httpi.examples.test.mjs testing/httpi/httpi.unit.test.mjs testing/httpi/httpi.publish.test.mjs",
+    "test": "pnpm build && node --test testing/runmark/runmark.e2e.test.mjs testing/runmark/runmark.examples.test.mjs testing/runmark/runmark.unit.test.mjs testing/runmark/runmark.publish.test.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm build"
   },
   "devDependencies": {

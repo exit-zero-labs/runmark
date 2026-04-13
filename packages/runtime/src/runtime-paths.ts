@@ -1,5 +1,5 @@
 /**
- * Runtime path helpers for `httpi/artifacts/`.
+ * Runtime path helpers for `runmark/artifacts/`.
  *
  * The runtime package treats every path as security-sensitive: directories must
  * stay within the project root, must not traverse symlinks, and are created
@@ -11,10 +11,10 @@ import {
   assertPathWithin,
   ensureDir,
   exitCodes,
-  HttpiError,
+  RunmarkError,
   resolveFromRoot,
   runtimeDirectoryName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { isMissingPathError } from "./runtime-errors.js";
 
 /** Canonical absolute locations for the runtime directory tree. */
@@ -42,7 +42,7 @@ export const runtimeFileMode = 0o600;
 
 const sessionIdPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
-/** Ensure the `httpi/artifacts/` runtime tree exists and stays inside the project root. */
+/** Ensure the `runmark/artifacts/` runtime tree exists and stays inside the project root. */
 export async function ensureRuntimePaths(
   projectRoot: string,
 ): Promise<RuntimePaths> {
@@ -54,17 +54,17 @@ export async function ensureRuntimePaths(
   await ensureProjectOwnedDirectory(
     projectRoot,
     runtimeDir,
-    "The local httpi/artifacts runtime directory",
+    "The local runmark/artifacts runtime directory",
   );
   await ensureProjectOwnedDirectory(
     projectRoot,
     sessionsDir,
-    "The local httpi/artifacts/sessions directory",
+    "The local runmark/artifacts/sessions directory",
   );
   await ensureProjectOwnedDirectory(
     projectRoot,
     historyDir,
-    "The local httpi/artifacts/history directory",
+    "The local runmark/artifacts/history directory",
   );
   await Promise.all([
     chmod(runtimeDir, runtimeDirectoryMode),
@@ -91,14 +91,14 @@ export async function ensureProjectOwnedDirectory(
 
   const stats = await lstat(directoryPath);
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "RUNTIME_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
     );
   }
   if (!stats.isDirectory()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "RUNTIME_PATH_INVALID",
       `${message} must be a directory.`,
       { exitCode: exitCodes.validationFailure },
@@ -131,14 +131,14 @@ export async function assertProjectOwnedFileIfExists(
   }
 
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "RUNTIME_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
     );
   }
   if (!stats.isFile()) {
-    throw new HttpiError("RUNTIME_PATH_INVALID", `${message} must be a file.`, {
+    throw new RunmarkError("RUNTIME_PATH_INVALID", `${message} must be a file.`, {
       exitCode: exitCodes.validationFailure,
     });
   }
@@ -158,7 +158,7 @@ export function assertValidSessionId(sessionId: string): void {
     return;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "SESSION_ID_INVALID",
     `Session ID ${sessionId} is invalid.`,
     { exitCode: exitCodes.validationFailure },

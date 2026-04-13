@@ -2,11 +2,11 @@ import { open } from "node:fs/promises";
 import {
   createLockOwnerId,
   exitCodes,
-  HttpiError,
+  RunmarkError,
   removeFileIfExists,
   stableStringify,
   toIsoTimestamp,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { isFileExistsError } from "./runtime-errors.js";
 import {
   assertValidSessionId,
@@ -35,7 +35,7 @@ export async function acquireSessionLock(
     runtimeFileMode,
   ).catch((error: unknown) => {
     if (isFileExistsError(error)) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SESSION_LOCKED",
         `Session ${sessionId} is already locked by another process.`,
         {

@@ -4,9 +4,9 @@ This changelog tracks user-visible changes for the current `0.3.x` line.
 
 ## 0.3.0
 
-- consolidate runtime state under `httpi/artifacts/`, replace `responses/` with `history/`, and capture canonical per-attempt `request.json` artifacts with recorded response/error outcomes
+- consolidate runtime state under `runmark/artifacts/`, replace `responses/` with `history/`, and capture canonical per-attempt `request.json` artifacts with recorded response/error outcomes
 - make `examples/` the only checked-in reference set, remove the repo-root sample project, and expand the catalog with multi-env, CRUD, ecommerce, incident, and failure-recovery examples
-- prepare scoped npm publishing for the `@exit-zero-labs/httpi` CLI and `@exit-zero-labs/httpi-mcp` adapter with Changesets-based release automation
+- prepare scoped npm publishing for the `@exit-zero-labs/runmark` CLI and `@exit-zero-labs/runmark-mcp` adapter with Changesets-based release automation
 - keep the shared engine workspace packages private while publishing standalone CLI and MCP install surfaces
 - switch npm publishing from repository tokens to GitHub Actions trusted publishing via OIDC
 

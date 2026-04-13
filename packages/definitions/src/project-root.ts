@@ -4,10 +4,10 @@ import {
   assertPathWithin,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   resolveFromRoot,
   trackedDirectoryName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 
 export interface FindProjectRootOptions {
   cwd?: string | undefined;
@@ -25,7 +25,7 @@ export async function findProjectRoot(
       "config.yaml",
     );
     if (!(await fileExists(configPath))) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "PROJECT_NOT_FOUND",
         `No ${trackedDirectoryName}/config.yaml found under ${resolvedProjectRoot}.`,
         {
@@ -65,9 +65,9 @@ export async function findProjectRoot(
     currentDirectory = parentDirectory;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "PROJECT_NOT_FOUND",
-    `No ${trackedDirectoryName}/config.yaml found from ${startingDirectory}. Run httpi init first.`,
+    `No ${trackedDirectoryName}/config.yaml found from ${startingDirectory}. Run runmark init first.`,
     {
       exitCode: exitCodes.validationFailure,
     },
@@ -80,14 +80,14 @@ async function assertTrackedDirectoryWithinProjectRoot(
   const trackedRoot = resolveFromRoot(projectRoot, trackedDirectoryName);
   const trackedStats = await lstat(trackedRoot);
   if (trackedStats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `The tracked ${trackedDirectoryName} directory must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
     );
   }
   if (!trackedStats.isDirectory()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `The tracked ${trackedDirectoryName} path must be a directory.`,
       { exitCode: exitCodes.validationFailure },

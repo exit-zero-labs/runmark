@@ -32,13 +32,13 @@ importers:
 
   apps/cli:
     dependencies:
-      '@exit-zero-labs/httpi-contracts':
+      '@exit-zero-labs/runmark-contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@exit-zero-labs/httpi-execution':
+      '@exit-zero-labs/runmark-execution':
         specifier: workspace:*
         version: link:../../packages/execution
-      '@exit-zero-labs/httpi-shared':
+      '@exit-zero-labs/runmark-shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@modelcontextprotocol/sdk':
@@ -75,10 +75,10 @@ importers:
 
   packages/definitions:
     dependencies:
-      '@exit-zero-labs/httpi-contracts':
+      '@exit-zero-labs/runmark-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@exit-zero-labs/httpi-shared':
+      '@exit-zero-labs/runmark-shared':
         specifier: workspace:*
         version: link:../shared
       yaml:
@@ -87,37 +87,37 @@ importers:
 
   packages/execution:
     dependencies:
-      '@exit-zero-labs/httpi-contracts':
+      '@exit-zero-labs/runmark-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@exit-zero-labs/httpi-definitions':
+      '@exit-zero-labs/runmark-definitions':
         specifier: workspace:*
         version: link:../definitions
-      '@exit-zero-labs/httpi-http':
+      '@exit-zero-labs/runmark-http':
         specifier: workspace:*
         version: link:../http
-      '@exit-zero-labs/httpi-runtime':
+      '@exit-zero-labs/runmark-runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@exit-zero-labs/httpi-shared':
+      '@exit-zero-labs/runmark-shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/http:
     dependencies:
-      '@exit-zero-labs/httpi-contracts':
+      '@exit-zero-labs/runmark-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@exit-zero-labs/httpi-shared':
+      '@exit-zero-labs/runmark-shared':
         specifier: workspace:*
         version: link:../shared
 
   packages/runtime:
     dependencies:
-      '@exit-zero-labs/httpi-contracts':
+      '@exit-zero-labs/runmark-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@exit-zero-labs/httpi-shared':
+      '@exit-zero-labs/runmark-shared':
         specifier: workspace:*
         version: link:../shared
       yaml:

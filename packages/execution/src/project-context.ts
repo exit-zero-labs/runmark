@@ -10,12 +10,12 @@ import type {
   FlatVariableMap,
   SessionRecord,
   SessionStepRecord,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   findProjectRoot,
   loadProjectFiles,
-} from "@exit-zero-labs/httpi-definitions";
-import { exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-definitions";
+import { exitCodes, RunmarkError } from "@exit-zero-labs/runmark-shared";
 import type { EngineOptions, LoadedProjectContext } from "./types.js";
 
 /** Normalized compile options passed into the definitions snapshot compiler. */
@@ -41,7 +41,7 @@ export function getSingleRequestStep(
 ): CompiledRequestStep {
   const step = compiled.steps[0];
   if (!step || step.kind !== "request") {
-    throw new HttpiError(
+    throw new RunmarkError(
       "INVALID_COMPILED_REQUEST",
       `Compiled request ${targetId} did not produce a request step.`,
     );
@@ -57,7 +57,7 @@ export function getSessionStepRecord(
 ): SessionStepRecord {
   const stepRecord = session.stepRecords[stepId];
   if (!stepRecord) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "STEP_NOT_FOUND",
       `Step ${stepId} was not found in session ${session.sessionId}.`,
       { exitCode: exitCodes.internalError },

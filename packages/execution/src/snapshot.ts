@@ -5,17 +5,17 @@ import type {
   BodyExpectation,
   HttpExecutionResult,
   JsonValue,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   exitCodes,
   fileExists,
-  HttpiError,
-} from "@exit-zero-labs/httpi-shared";
+  RunmarkError,
+} from "@exit-zero-labs/runmark-shared";
 
 /**
  * B3 snapshot / golden-response comparison.
  *
- * - Loads an expected snapshot from a tracked path under `httpi/snapshots/`.
+ * - Loads an expected snapshot from a tracked path under `runmark/snapshots/`.
  * - Applies declarative masks (`mask: [{ path: $.requestId }]`) so volatile
  *   fields are excluded from the diff.
  * - Emits a JSON Patch (RFC 6902) as the `actual` field of the structured
@@ -52,7 +52,7 @@ export async function evaluateSnapshotAssertion(
         path: "body.snapshot",
         matcher: "snapshot.missing",
         expected: body.file,
-        actual: `no snapshot at ${snapshotPath} — run: httpi snapshot accept <sessionId> --step <id>`,
+        actual: `no snapshot at ${snapshotPath} — run: runmark snapshot accept <sessionId> --step <id>`,
         passed: false,
       },
     ];
@@ -293,7 +293,7 @@ export async function acceptSnapshot(
   await mkdir(dirname(snapshotPath), { recursive: true });
   await writeFile(snapshotPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
   if (!(await fileExists(snapshotPath))) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SNAPSHOT_WRITE_FAILED",
       `Failed to write snapshot at ${snapshotPath}.`,
       { exitCode: exitCodes.internalError },

@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - Claude Code Instructions
+# runmark - Claude Code Instructions
 
 @AGENTS.md
 

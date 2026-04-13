@@ -7,12 +7,12 @@ import type {
   ResolvedRequestModel,
   SessionRecord,
   StepArtifactSummary,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   redactArtifactText,
   writeStepArtifacts,
-} from "@exit-zero-labs/httpi-runtime";
-import { redactHeaders, redactJsonValue } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-runtime";
+import { redactHeaders, redactJsonValue } from "@exit-zero-labs/runmark-shared";
 
 interface RequestArtifactWriteResult {
   outcome: "success" | "failed";

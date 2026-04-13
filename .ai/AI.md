@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - Shared AI Instructions
+# runmark - Shared AI Instructions
 
 <!-- E0L company-wide context (agent personas, architecture decisions, git workflow).
      Available inside dev container via the .e0l symlink -> /workspace-config.
@@ -8,7 +8,7 @@
 
 @./.e0l/.ai/AI.md
 
-`httpi` is an open-source HTTP client, CLI, and MCP project for defining, executing, pausing, resuming, and inspecting HTTP workflows from a Git-tracked repository.
+`runmark` is an open-source HTTP client, CLI, and MCP project for defining, executing, pausing, resuming, and inspecting HTTP workflows from a Git-tracked repository.
 
 ## Canonical documents
 
@@ -40,11 +40,11 @@ pnpm build
 ## Architecture rules
 
 1. **Tracked intent vs untracked runtime**
-   - `httpi/` is the tracked source of truth
-   - `httpi/artifacts/` is local runtime state and must stay Git-ignored apart from tracked `.gitkeep` placeholders
+   - `runmark/` is the tracked source of truth
+   - `runmark/artifacts/` is local runtime state and must stay Git-ignored apart from tracked `.gitkeep` placeholders
 
 2. **Thin interface adapter**
-   - `apps/cli` stays thin — it ships the `httpi` CLI bin plus the `httpi mcp` stdio MCP server from a single package
+   - `apps/cli` stays thin — it ships the `runmark` CLI bin plus the `runmark mcp` stdio MCP server from a single package
    - execution logic belongs in shared packages
 
 3. **Request-first authoring**

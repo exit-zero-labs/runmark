@@ -3,13 +3,13 @@ import type {
   FlatVariableValue,
   HttpExecutionResult,
   JsonValue,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
 import {
   exitCodes,
-  HttpiError,
+  RunmarkError,
   looksLikeSecretFieldName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import type { ExtractedStepOutputs } from "./types.js";
 
 export function extractStepOutputs(
@@ -35,7 +35,7 @@ export function extractStepOutputs(
     if (extractedValue === undefined) {
       if (definition.required) {
         const message = `Required extraction ${name} was not found at ${definition.from}.`;
-        throw new HttpiError("EXTRACTION_FAILED", message, {
+        throw new RunmarkError("EXTRACTION_FAILED", message, {
           exitCode: exitCodes.executionFailure,
           details: [
             {

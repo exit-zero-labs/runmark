@@ -1,12 +1,12 @@
 import type {
   SessionRecord,
   StepArtifactSummary,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   exitCodes,
-  HttpiError,
+  RunmarkError,
   toIsoTimestamp,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { getSessionStepRecord } from "./project-context.js";
 
 interface FinishAttemptOptions {
@@ -29,7 +29,7 @@ export function findStepStartIndex(session: SessionRecord): number {
     return foundIndex;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "STEP_NOT_FOUND",
     `Session ${session.sessionId} points at missing step ${session.nextStepId}.`,
     { exitCode: exitCodes.unsafeResume },

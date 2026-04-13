@@ -3,12 +3,12 @@ import { dirname, isAbsolute, resolve as resolvePath } from "node:path";
 import type {
   AssertionResult,
   JsonValue,
-} from "@exit-zero-labs/httpi-contracts";
-import { exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { exitCodes, RunmarkError } from "@exit-zero-labs/runmark-shared";
 
 /**
  * Minimal JSON Schema (draft 2020-12 subset) evaluator used by the `expect`
- * DSL. It intentionally supports only the keywords needed by the httpi
+ * DSL. It intentionally supports only the keywords needed by the runmark
  * assertion surface: type, required, properties, additionalProperties, items,
  * enum, const, minimum, maximum, minLength, maxLength, pattern, minItems,
  * maxItems, uniqueItems. Results are emitted as `AssertionResult` entries so
@@ -57,7 +57,7 @@ export async function loadJsonSchema(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "unknown filesystem error";
-    throw new HttpiError(
+    throw new RunmarkError(
       "SCHEMA_NOT_FOUND",
       `Could not read JSON schema at ${candidate}: ${message}`,
       { exitCode: exitCodes.validationFailure },
@@ -68,7 +68,7 @@ export async function loadJsonSchema(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "unknown JSON parse error";
-    throw new HttpiError(
+    throw new RunmarkError(
       "SCHEMA_INVALID_JSON",
       `JSON schema at ${candidate} is not valid JSON: ${message}`,
       { exitCode: exitCodes.validationFailure },

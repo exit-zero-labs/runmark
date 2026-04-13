@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas/config.schema.json
+schemaVersion: 1
+project: pause-resume
+defaultEnv: dev
+
+defaults:
+  timeoutMs: 5000
+
+capture:
+  requestSummary: true
+  responseMetadata: true
+  responseBody: full
+  maxBodyBytes: 1048576
+  redactHeaders:
+    - authorization
+    - cookie
+    - set-cookie

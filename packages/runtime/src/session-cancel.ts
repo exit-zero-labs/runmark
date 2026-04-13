@@ -2,11 +2,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import {
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   removeFileIfExists,
   resolveFromRoot,
   toIsoTimestamp,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import {
   assertValidSessionId,
   ensureRuntimePaths,
@@ -14,11 +14,11 @@ import {
 } from "./runtime-paths.js";
 
 /**
- * Cross-process cancellation signal for a session. The CLI `httpi cancel` and
+ * Cross-process cancellation signal for a session. The CLI `runmark cancel` and
  * MCP `cancel_session` write a marker file that the executing run polls at
  * step boundaries and stream read-loop iterations.
  *
- * Layout: `httpi/artifacts/sessions/<sessionId>.cancel`
+ * Layout: `runmark/artifacts/sessions/<sessionId>.cancel`
  */
 
 export interface SessionCancelRecord {
@@ -66,7 +66,7 @@ export async function readSessionCancel(
     const raw = await readFile(markerPath, "utf8");
     return JSON.parse(raw) as SessionCancelRecord;
   } catch (error) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SESSION_CANCEL_MARKER_INVALID",
       `Cancel marker for session ${sessionId} is malformed.`,
       { exitCode: exitCodes.validationFailure, cause: error },

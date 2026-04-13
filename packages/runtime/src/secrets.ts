@@ -3,9 +3,9 @@ import {
   assertPathWithin,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   readUtf8File,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { parseDocument } from "yaml";
 import { ensureRuntimePaths, runtimeFileMode } from "./runtime-paths.js";
 
@@ -19,9 +19,9 @@ export async function loadSecrets(
 
   const secretsStats = await lstat(runtimePaths.secretsPath);
   if (secretsStats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SECRETS_PATH_INVALID",
-      "The local httpi/artifacts/secrets.yaml file must not resolve through a symlink.",
+      "The local runmark/artifacts/secrets.yaml file must not resolve through a symlink.",
       { exitCode: exitCodes.validationFailure },
     );
   }
@@ -30,7 +30,7 @@ export async function loadSecrets(
   assertPathWithin(resolvedRuntimeDir, resolvedSecretsPath, {
     code: "SECRETS_PATH_INVALID",
     message:
-      "The local httpi/artifacts/secrets.yaml file must stay within httpi/artifacts/.",
+      "The local runmark/artifacts/secrets.yaml file must stay within runmark/artifacts/.",
     exitCode: exitCodes.validationFailure,
   });
   if (process.platform !== "win32") {
@@ -40,9 +40,9 @@ export async function loadSecrets(
   const rawContent = await readUtf8File(runtimePaths.secretsPath);
   const document = parseDocument(rawContent);
   if (document.errors.length > 0) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SECRETS_INVALID",
-      "The local httpi/artifacts/secrets.yaml file could not be parsed.",
+      "The local runmark/artifacts/secrets.yaml file could not be parsed.",
       {
         exitCode: exitCodes.validationFailure,
         details: document.errors.map((error) => error.message),
@@ -56,9 +56,9 @@ export async function loadSecrets(
     : extractValuesRecord(parsedValue);
 
   if (!valuesRecord) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SECRETS_INVALID",
-      "The local httpi/artifacts/secrets.yaml file must be a string map or contain a values string map.",
+      "The local runmark/artifacts/secrets.yaml file must be a string map or contain a values string map.",
       {
         exitCode: exitCodes.validationFailure,
       },

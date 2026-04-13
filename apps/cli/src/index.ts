@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Thin CLI adapter for the shared `httpi` engine.
+ * Thin CLI adapter for the shared `runmark` engine.
  *
  * This file should stay focused on argv parsing, command dispatch, terminal
  * formatting, and exit-code mapping. Domain behavior belongs in packages.
@@ -9,7 +9,7 @@
 import type {
   Diagnostic,
   FlatVariableMap,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   acceptSnapshotForStep,
   cancelSessionRun,
@@ -26,12 +26,12 @@ import {
   runRequest,
   runRun,
   validateProject,
-} from "@exit-zero-labs/httpi-execution";
+} from "@exit-zero-labs/runmark-execution";
 import {
   coerceFlatValue,
   exitCodes,
-  HttpiError,
-} from "@exit-zero-labs/httpi-shared";
+  RunmarkError,
+} from "@exit-zero-labs/runmark-shared";
 import packageJson from "../package.json" with { type: "json" };
 import { formatCliDiagnostics, toCliFailure } from "./error.js";
 
@@ -65,7 +65,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
 
   if (command === "mcp") {
     // Lazy-import so CLI users who never touch MCP don't pay the cost of
-    // parsing @modelcontextprotocol/sdk on every `httpi` invocation.
+    // parsing @modelcontextprotocol/sdk on every `runmark` invocation.
     const { startMcpServer } = await import("./mcp.js");
     await startMcpServer();
     return exitCodes.success;
@@ -161,9 +161,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
         : exitCodes.success;
     }
 
-    throw new HttpiError(
+    throw new RunmarkError(
       "DESCRIBE_TARGET_REQUIRED",
-      requiredTargetMessage("describe", "httpi describe --request ping"),
+      requiredTargetMessage("describe", "runmark describe --request ping"),
       { exitCode: exitCodes.validationFailure },
     );
   }
@@ -206,9 +206,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
         : exitCodes.success;
     }
 
-    throw new HttpiError(
+    throw new RunmarkError(
       "RUN_TARGET_REQUIRED",
-      requiredTargetMessage("run", "httpi run --request ping"),
+      requiredTargetMessage("run", "runmark run --request ping"),
       { exitCode: exitCodes.validationFailure },
     );
   }
@@ -216,17 +216,17 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
   if (command === "snapshot") {
     const sub = parsedArgs.positionals[1];
     if (sub !== "accept") {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SNAPSHOT_SUBCOMMAND_REQUIRED",
-        "Use httpi snapshot accept <sessionId> --step <stepId>.",
+        "Use runmark snapshot accept <sessionId> --step <stepId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
     const sessionId = parsedArgs.positionals[2];
     if (!sessionId || !stepId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SNAPSHOT_ARGS_REQUIRED",
-        "Use httpi snapshot accept <sessionId> --step <stepId>.",
+        "Use runmark snapshot accept <sessionId> --step <stepId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -240,9 +240,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
   if (command === "cancel") {
     const sessionId = parsedArgs.positionals[1];
     if (!sessionId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SESSION_ID_REQUIRED",
-        "Use httpi cancel <sessionId>.",
+        "Use runmark cancel <sessionId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -259,9 +259,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
   if (command === "resume") {
     const sessionId = parsedArgs.positionals[1];
     if (!sessionId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SESSION_ID_REQUIRED",
-        "Use httpi resume <sessionId>.",
+        "Use runmark resume <sessionId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -277,18 +277,18 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
 
   if (command === "session") {
     if (parsedArgs.positionals[1] !== "show") {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SESSION_SUBCOMMAND_REQUIRED",
-        "Use httpi session show <sessionId>.",
+        "Use runmark session show <sessionId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
 
     const sessionId = parsedArgs.positionals[2];
     if (!sessionId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "SESSION_ID_REQUIRED",
-        "Use httpi session show <sessionId>.",
+        "Use runmark session show <sessionId>.",
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -304,9 +304,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     if (subcommand === "list") {
       const sessionId = parsedArgs.positionals[2];
       if (!sessionId) {
-        throw new HttpiError(
+        throw new RunmarkError(
           "SESSION_ID_REQUIRED",
-          "Use httpi artifacts list <sessionId>.",
+          "Use runmark artifacts list <sessionId>.",
           { exitCode: exitCodes.validationFailure },
         );
       }
@@ -323,9 +323,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       const sessionId = parsedArgs.positionals[2];
       const relativePath = parsedArgs.positionals[3];
       if (!sessionId || !relativePath) {
-        throw new HttpiError(
+        throw new RunmarkError(
           "ARTIFACT_PATH_REQUIRED",
-          "Use httpi artifacts read <sessionId> <relativePath>.",
+          "Use runmark artifacts read <sessionId> <relativePath>.",
           { exitCode: exitCodes.validationFailure },
         );
       }
@@ -342,18 +342,18 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       return exitCodes.success;
     }
 
-    throw new HttpiError(
+    throw new RunmarkError(
       "ARTIFACTS_SUBCOMMAND_REQUIRED",
-      "Use httpi artifacts list <sessionId> or httpi artifacts read <sessionId> <relativePath>.",
+      "Use runmark artifacts list <sessionId> or runmark artifacts read <sessionId> <relativePath>.",
       { exitCode: exitCodes.validationFailure },
     );
   }
 
   if (command === "explain") {
     if (parsedArgs.positionals[1] !== "variables") {
-      throw new HttpiError(
+      throw new RunmarkError(
         "EXPLAIN_SUBCOMMAND_REQUIRED",
-        "Use httpi explain variables (--request <id> | --run <id>).",
+        "Use runmark explain variables (--request <id> | --run <id>).",
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -362,11 +362,11 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     const runId = parsedArgs.flags.run?.[0];
     assertSingleTarget(requestId, runId, "explain variables");
     if (!requestId && !runId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "EXPLAIN_TARGET_REQUIRED",
         requiredTargetMessage(
           "explain variables",
-          "httpi explain variables --request ping",
+          "runmark explain variables --request ping",
         ),
         { exitCode: exitCodes.validationFailure },
       );
@@ -386,7 +386,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       : exitCodes.success;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "UNKNOWN_COMMAND",
     `Unknown command: ${argv.join(" ")}`,
     { exitCode: exitCodes.validationFailure },
@@ -395,26 +395,26 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
 
 /** Print the human-facing CLI usage summary. */
 function printUsage(): void {
-  const usage = `httpi
+  const usage = `runmark
 
 Usage:
-  httpi --help
-  httpi --version
-  httpi init [--project-root <path>]
-  httpi list [requests|runs|envs|sessions] [--project-root <path>]
-  httpi validate [--project-root <path>]
-  httpi describe --request <id> [--env <id>] [--input key=value]
-  httpi describe --run <id> [--env <id>] [--input key=value]
-  httpi run --request <id> [--env <id>] [--input key=value]
-  httpi run --run <id> [--env <id>] [--input key=value] [--reporter <spec>]
-  httpi cancel <sessionId> [--reason <text>] [--project-root <path>]
-  httpi snapshot accept <sessionId> --step <stepId> [--project-root <path>]
-  httpi resume <sessionId> [--project-root <path>]
-  httpi session show <sessionId> [--project-root <path>]
-  httpi artifacts list <sessionId> [--step <id>] [--project-root <path>]
-  httpi artifacts read <sessionId> <relativePath> [--project-root <path>]
-  httpi explain variables (--request <id> | --run <id>) [--step <id>] [--env <id>] [--input key=value]
-  httpi mcp                                       (start the stdio MCP server)
+  runmark --help
+  runmark --version
+  runmark init [--project-root <path>]
+  runmark list [requests|runs|envs|sessions] [--project-root <path>]
+  runmark validate [--project-root <path>]
+  runmark describe --request <id> [--env <id>] [--input key=value]
+  runmark describe --run <id> [--env <id>] [--input key=value]
+  runmark run --request <id> [--env <id>] [--input key=value]
+  runmark run --run <id> [--env <id>] [--input key=value] [--reporter <spec>]
+  runmark cancel <sessionId> [--reason <text>] [--project-root <path>]
+  runmark snapshot accept <sessionId> --step <stepId> [--project-root <path>]
+  runmark resume <sessionId> [--project-root <path>]
+  runmark session show <sessionId> [--project-root <path>]
+  runmark artifacts list <sessionId> [--step <id>] [--project-root <path>]
+  runmark artifacts read <sessionId> <relativePath> [--project-root <path>]
+  runmark explain variables (--request <id> | --run <id>) [--step <id>] [--env <id>] [--input key=value]
+  runmark mcp                                       (start the stdio MCP server)
 
 List targets:
   requests   list tracked request definitions
@@ -423,23 +423,23 @@ List targets:
   sessions   list persisted runtime sessions
 
 Notes:
-  - When --project-root is omitted, httpi discovers the nearest httpi/config.yaml.
+  - When --project-root is omitted, runmark discovers the nearest runmark/config.yaml.
   - Outputs are JSON by default, except list subcommands which print tab-separated rows.
 
 Examples:
-  httpi list requests
-  httpi list sessions
-  httpi describe --request ping
-  httpi run --run smoke
-  httpi artifacts list <sessionId>
-  httpi resume <sessionId>
+  runmark list requests
+  runmark list sessions
+  runmark describe --request ping
+  runmark run --run smoke
+  runmark artifacts list <sessionId>
+  runmark resume <sessionId>
 `;
 
   process.stdout.write(`${usage}\n`);
 }
 
 // F1: CI reporter. Minimal JSON reporter supported in this slice.
-// Format: --reporter json:./path.json  (shorthand `json` writes to httpi/artifacts/reports/run.json)
+// Format: --reporter json:./path.json  (shorthand `json` writes to runmark/artifacts/reports/run.json)
 // Additional formats (junit, tap, github) ship in follow-up work.
 /** Write an optional reporter artifact for CI or automation consumers. */
 async function maybeWriteReporter(
@@ -453,17 +453,17 @@ async function maybeWriteReporter(
   const format = (rawFormat ?? "json").toLowerCase();
   if (format !== "json") {
     process.stderr.write(
-      `[httpi] --reporter=${format} is not yet implemented; only 'json' ships in this release. Skipping.\n`,
+      `[runmark] --reporter=${format} is not yet implemented; only 'json' ships in this release. Skipping.\n`,
     );
     return;
   }
   const target = resolvePath(
     process.cwd(),
-    rawPath && rawPath.length > 0 ? rawPath : "httpi/artifacts/reports/run.json",
+    rawPath && rawPath.length > 0 ? rawPath : "runmark/artifacts/reports/run.json",
   );
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, `${JSON.stringify(result, null, 2)}\n`, "utf8");
-  process.stderr.write(`[httpi] wrote JSON reporter to ${target}\n`);
+  process.stderr.write(`[runmark] wrote JSON reporter to ${target}\n`);
 }
 
 /** Minimal flag parser for the published CLI surface. */
@@ -517,7 +517,7 @@ function parseInputs(inputAssignments: string[]): FlatVariableMap {
   return inputAssignments.reduce<FlatVariableMap>((result, assignment) => {
     const separatorIndex = assignment.indexOf("=");
     if (separatorIndex === -1) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "INVALID_INPUT",
         `Invalid --input value ${assignment}. Expected key=value.`,
         { exitCode: exitCodes.validationFailure },
@@ -527,7 +527,7 @@ function parseInputs(inputAssignments: string[]): FlatVariableMap {
     const key = assignment.slice(0, separatorIndex);
     const rawValue = assignment.slice(separatorIndex + 1);
     if (key.length === 0) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "INVALID_INPUT",
         `Invalid --input value ${assignment}. Expected key=value.`,
         { exitCode: exitCodes.validationFailure },
@@ -545,7 +545,7 @@ function assertSingleTarget(
   commandName: string,
 ): void {
   if (requestId && runId) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "TARGET_AMBIGUOUS",
       `${commandLabel(commandName)} accepts either --request <id> or --run <id>, not both.`,
       { exitCode: exitCodes.validationFailure },

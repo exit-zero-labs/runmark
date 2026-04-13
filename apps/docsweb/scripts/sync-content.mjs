@@ -6,7 +6,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(appRoot, "../..");
 const generatedRoot = resolve(appRoot, "src/content/docs/generated");
-const repositoryUrl = "https://github.com/exit-zero-labs/httpi";
+const repositoryUrl = "https://github.com/exit-zero-labs/runmark";
 
 const pages = [
   {
@@ -15,7 +15,7 @@ const pages = [
     slug: "guides/agent-guide",
     title: "Agent guide",
     description:
-      "Recommended CLI and MCP validation loop for coding agents using httpi.",
+      "Recommended CLI and MCP validation loop for coding agents using Runmark.",
   },
   {
     sourcePath: "docs/get-started.md",
@@ -23,7 +23,7 @@ const pages = [
     slug: "guides/contributor-get-started",
     title: "Contributor setup",
     description:
-      "Local development workflow for contributors working in the httpi monorepo.",
+      "Local development workflow for contributors working in the Runmark monorepo.",
   },
   {
     sourcePath: "docs/product.md",
@@ -31,7 +31,7 @@ const pages = [
     slug: "reference/product-overview",
     title: "Product overview",
     description:
-      "What httpi is, who it is for, and how it differs from GUI-first API tooling.",
+      "What Runmark is, who it is for, and how it differs from GUI-first API tooling.",
   },
   {
     sourcePath: "docs/runmark/brand-foundation.md",
@@ -63,7 +63,7 @@ const pages = [
     slug: "runmark/applications",
     title: "Applications",
     description:
-      "How the Runmark draft system should be applied across docs, README, screenshots, and transition surfaces.",
+      "How Runmark should be applied across docs, README, screenshots, and migration surfaces.",
   },
   {
     sourcePath: "docs/runmark/rebrand-transition.md",
@@ -71,7 +71,7 @@ const pages = [
     slug: "runmark/rebrand-transition",
     title: "Rebrand transition",
     description:
-      "Scope, guardrails, and phased rename guidance for moving from httpi to Runmark.",
+      "Shipped rename details and migration guidance from httpi to Runmark.",
   },
   {
     sourcePath: "docs/architecture.md",
@@ -87,7 +87,7 @@ const pages = [
     slug: "reference/roadmap",
     title: "Roadmap",
     description:
-      "Adoption, documentation, and runtime hardening follow-up work for httpi.",
+      "Adoption, documentation, and runtime hardening follow-up work for Runmark.",
   },
   {
     sourcePath: "docs/support.md",

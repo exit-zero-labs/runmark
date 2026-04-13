@@ -1,5 +1,5 @@
 /**
- * Loads tracked project files from `httpi/` into typed in-memory definitions.
+ * Loads tracked project files from `runmark/` into typed in-memory definitions.
  *
  * This module owns path-derived identity, typed YAML parsing, secret-literal
  * detection, and enrichment of file-backed diagnostics before execution begins.
@@ -16,14 +16,14 @@ import type {
   ProjectFiles,
   RequestDefinition,
   RunDefinition,
-} from "@exit-zero-labs/httpi-contracts";
-import { schemaVersion } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { schemaVersion } from "@exit-zero-labs/runmark-contracts";
 import {
   assertPathWithin,
   envFileSuffix,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   readUtf8File,
   relativeId,
   requestFileSuffix,
@@ -33,7 +33,7 @@ import {
   trackedDirectoryName,
   walkFiles,
   yamlFileSuffix,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { LineCounter, parseDocument } from "yaml";
 import {
   createYamlDiagnosticResolver,
@@ -299,14 +299,14 @@ async function assertProjectOwnedTrackedDirectory(
 ): Promise<void> {
   const stats = await lstat(directoryPath);
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
     );
   }
   if (!stats.isDirectory()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must be a directory.`,
       {
@@ -331,14 +331,14 @@ async function assertProjectOwnedTrackedFile(
 ): Promise<void> {
   const stats = await lstat(filePath);
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
     );
   }
   if (!stats.isFile()) {
-    throw new HttpiError("PROJECT_PATH_INVALID", `${message} must be a file.`, {
+    throw new RunmarkError("PROJECT_PATH_INVALID", `${message} must be a file.`, {
       exitCode: exitCodes.validationFailure,
     });
   }

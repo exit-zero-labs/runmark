@@ -1,8 +1,8 @@
 <!-- @format -->
 
-# Contributing to httpi
+# Contributing to runmark
 
-Thanks for contributing to `httpi`.
+Thanks for contributing to `runmark`.
 
 ## Before you start
 
@@ -11,7 +11,7 @@ Thanks for contributing to `httpi`.
 - read [`docs/product.md`](docs/product.md)
 - read [`docs/architecture.md`](docs/architecture.md)
 - scan [`docs/roadmap.md`](docs/roadmap.md) for the current priorities so you do not duplicate planned work
-- read [`testing/httpi/README.md`](testing/httpi/README.md) before changing examples, judge assets, or end-to-end behavior
+- read [`testing/runmark/README.md`](testing/runmark/README.md) before changing examples, judge assets, or end-to-end behavior
 - check open issues before large changes so your proposal lines up with the roadmap and active discussions
 
 ## Local setup
@@ -37,7 +37,7 @@ For most non-trivial changes, the expected local loop is:
 - prefer named exports
 - keep files in kebab-case
 - keep CLI and MCP packages thin; move shared behavior into `packages/`
-- do not commit secrets or runtime artifacts from `httpi/artifacts/`
+- do not commit secrets or runtime artifacts from `runmark/artifacts/`
 - keep documentation aligned with behavior changes
 
 ## Pull requests
@@ -59,7 +59,7 @@ Changes that touch the public surface should update the relevant canonical docum
 - `docs/product.md` for user-facing product promises
 - `docs/architecture.md` for technical contracts and semantics
 - `packages/contracts/schemas/` and `.vscode/settings.json` when tracked YAML authoring rules change
-- `testing/httpi/README.md` and `testing/httpi/judge/basic-flow.md` when acceptance behavior changes
+- `testing/runmark/README.md` and `testing/runmark/judge/basic-flow.md` when acceptance behavior changes
 
 ## Release flow
 
@@ -72,9 +72,9 @@ For changes that should ship to npm:
 3. manually run `.github/workflows/release.yml` from GitHub Actions on `main`
 4. the workflow applies pending changesets, bumps the version, commits it as `github-actions[bot]`, and publishes the unpublished package version to npm
 
-Only `@exit-zero-labs/httpi` is published to npm. The shared `packages/*` workspace modules stay private implementation-detail packages. The CLI bin exposes both the `httpi` command surface and the `httpi mcp` stdio MCP server from a single binary.
+Only `@exit-zero-labs/runmark` is published to npm. The shared `packages/*` workspace modules stay private implementation-detail packages. The CLI bin exposes both the `runmark` command surface and the `runmark mcp` stdio MCP server from a single binary.
 
-Repository maintainers need an npm trusted publisher configured for `@exit-zero-labs/httpi` pointing at `release.yml` in `exit-zero-labs/httpi`. The release workflow uses GitHub OIDC so npm mints publish credentials at runtime without a long-lived repository secret.
+Repository maintainers need an npm trusted publisher configured for `@exit-zero-labs/runmark` pointing at `release.yml` in `exit-zero-labs/runmark`. The release workflow uses GitHub OIDC so npm mints publish credentials at runtime without a long-lived repository secret.
 
 ## Commits
 
@@ -91,7 +91,7 @@ docs: refine architecture overview
 Good early contributions include:
 
 - documentation improvements
-- example and judge assets under `examples/` and `testing/httpi/`
+- example and judge assets under `examples/` and `testing/runmark/`
 - schema and validation work
 - runtime safety and redaction improvements
 - CLI and MCP parity improvements

@@ -1,7 +1,7 @@
 {
-  "name": "@exit-zero-labs/httpi",
+  "name": "@exit-zero-labs/runmark",
   "version": "0.4.0",
-  "description": "httpi CLI and MCP server. `httpi` for humans and scripts, `httpi mcp` for agents.",
+  "description": "runmark CLI and MCP server. `runmark` for humans and scripts, `runmark mcp` for agents.",
   "type": "module",
   "license": "MIT",
   "author": "Exit Zero Labs LLC",
@@ -9,7 +9,7 @@
     "node": ">=20"
   },
   "bin": {
-    "httpi": "dist/index.js"
+    "runmark": "dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./src/index.ts",
@@ -29,13 +29,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/exit-zero-labs/httpi.git",
+    "url": "https://github.com/exit-zero-labs/runmark.git",
     "directory": "apps/cli"
   },
   "bugs": {
-    "url": "https://github.com/exit-zero-labs/httpi/issues"
+    "url": "https://github.com/exit-zero-labs/runmark/issues"
   },
-  "homepage": "https://github.com/exit-zero-labs/httpi#readme",
+  "homepage": "https://github.com/exit-zero-labs/runmark#readme",
   "funding": [
     {
       "type": "github",
@@ -55,9 +55,9 @@
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@exit-zero-labs/httpi-contracts": "workspace:*",
-    "@exit-zero-labs/httpi-execution": "workspace:*",
-    "@exit-zero-labs/httpi-shared": "workspace:*",
+    "@exit-zero-labs/runmark-contracts": "workspace:*",
+    "@exit-zero-labs/runmark-execution": "workspace:*",
+    "@exit-zero-labs/runmark-shared": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "yaml": "^2.8.3",
     "zod": "^4.3.6"

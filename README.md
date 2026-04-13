@@ -1,13 +1,13 @@
-# httpi
+# Runmark
 
 <p>
-  <a href="https://github.com/exit-zero-labs/httpi/actions/workflows/check.yml"><img alt="Check" src="https://img.shields.io/github/actions/workflow/status/exit-zero-labs/httpi/check.yml?branch=main&label=check&style=flat-square"></a>
-  <a href="https://github.com/exit-zero-labs/httpi/actions/workflows/ci.yml"><img alt="Node compatibility" src="https://img.shields.io/github/actions/workflow/status/exit-zero-labs/httpi/ci.yml?branch=main&label=node%20compatibility&style=flat-square"></a>
-  <a href="https://www.npmjs.com/package/@exit-zero-labs/httpi"><img alt="npm version" src="https://img.shields.io/npm/v/%40exit-zero-labs%2Fhttpi?label=npm&style=flat-square"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/exit-zero-labs/httpi?style=flat-square"></a>
+  <a href="https://github.com/exit-zero-labs/runmark/actions/workflows/check.yml"><img alt="Check" src="https://img.shields.io/github/actions/workflow/status/exit-zero-labs/runmark/check.yml?branch=main&label=check&style=flat-square"></a>
+  <a href="https://github.com/exit-zero-labs/runmark/actions/workflows/ci.yml"><img alt="Node compatibility" src="https://img.shields.io/github/actions/workflow/status/exit-zero-labs/runmark/ci.yml?branch=main&label=node%20compatibility&style=flat-square"></a>
+  <a href="https://www.npmjs.com/package/@exit-zero-labs/runmark"><img alt="npm version" src="https://img.shields.io/npm/v/%40exit-zero-labs%2Frunmark?label=npm&style=flat-square"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/exit-zero-labs/runmark?style=flat-square"></a>
 </p>
 
-`httpi` is a file-based HTTP workflow runner for repositories. It keeps tracked request intent in `httpi/`, git-ignored runtime state in `httpi/artifacts/`, and exposes the same execution model through a CLI and an MCP server — both shipped in a single binary.
+`runmark` is a file-based HTTP workflow runner for repositories. It keeps tracked request intent in `runmark/`, git-ignored runtime state in `runmark/artifacts/`, and exposes the same execution model through a CLI and an MCP server — both shipped in a single binary.
 
 Use it when API validation should live next to the code it exercises, with explicit runs, persisted artifacts, and pause/resume semantics that both humans and AI agents can inspect.
 
@@ -16,31 +16,31 @@ Use it when API validation should live next to the code it exercises, with expli
 One package, two surfaces:
 
 ```bash
-npm install -g @exit-zero-labs/httpi
+npm install -g @exit-zero-labs/runmark
 ```
 
 To update an existing global install:
 
 ```bash
-npm install -g @exit-zero-labs/httpi@latest
-httpi --version
+npm install -g @exit-zero-labs/runmark@latest
+runmark --version
 ```
 
-- `httpi` — the CLI for humans and scripts.
-- `httpi mcp` — the stdio MCP server for agents (same engine, same redaction, same artifacts).
+- `runmark` — the CLI for humans and scripts.
+- `runmark mcp` — the stdio MCP server for agents (same engine, same redaction, same artifacts).
 
 ```bash
 mkdir demo-api && cd demo-api
-httpi init
+runmark init
 ```
 
 ## What it solves
 
-| Need | `httpi` |
+| Need | `runmark` |
 | --- | --- |
-| tracked request definitions | plain files under `httpi/` |
+| tracked request definitions | plain files under `runmark/` |
 | multi-step API workflows | named runs with sequential, parallel, and pause-aware steps |
-| inspectable execution evidence | persisted, redacted sessions and artifacts under `httpi/artifacts/` |
+| inspectable execution evidence | persisted, redacted sessions and artifacts under `runmark/artifacts/` |
 | one model for humans and agents | the same engine through the CLI and the MCP adapter |
 
 ## Quick start
@@ -48,38 +48,38 @@ httpi init
 After `init`, the normal first loop is:
 
 ```bash
-# edit httpi/env/dev.env.yaml so baseUrl points at your service
-httpi validate
-httpi describe --run smoke
-httpi run --run smoke
+# edit runmark/env/dev.env.yaml so baseUrl points at your service
+runmark validate
+runmark describe --run smoke
+runmark run --run smoke
 ```
 
-`httpi init` gives you a small but real starting point: one environment, one request, one run, and schema-aware YAML files.
+`runmark init` gives you a small but real starting point: one environment, one request, one run, and schema-aware YAML files.
 
-If the flow needs local secrets, add them under `httpi/artifacts/secrets.yaml`:
+If the flow needs local secrets, add them under `runmark/artifacts/secrets.yaml`:
 
 ```yaml
 devPassword: swordfish
 apiToken: sk_test_123
 ```
 
-Tracked files can reference `{{secrets.alias}}` or `$ENV:NAME`, but secret literals should stay out of `httpi/`.
+Tracked files can reference `{{secrets.alias}}` or `$ENV:NAME`, but secret literals should stay out of `runmark/`.
 
 When a run pauses or fails, the next move stays explicit:
 
 ```bash
-httpi session show <sessionId>
-httpi artifacts list <sessionId>
-httpi resume <sessionId>
+runmark session show <sessionId>
+runmark artifacts list <sessionId>
+runmark resume <sessionId>
 ```
 
 ## Project layout
 
-`httpi` keeps the authored plan and the runtime evidence separate on purpose:
+`runmark` keeps the authored plan and the runtime evidence separate on purpose:
 
 ```text
 demo-api/
-└── httpi/
+└── runmark/
     ├── config.yaml
     ├── env/
     │   └── dev.env.yaml
@@ -95,10 +95,10 @@ demo-api/
 
 | Path | Purpose |
 | --- | --- |
-| `httpi/` | Git-tracked requests, runs, envs, blocks, body templates, and the git-ignored runtime subtree |
-| `httpi/artifacts/` | Local secrets, session state, locks, and captured request artifacts |
+| `runmark/` | Git-tracked requests, runs, envs, blocks, body templates, and the git-ignored runtime subtree |
+| `runmark/artifacts/` | Local secrets, session state, locks, and captured request artifacts |
 
-In normal projects, `httpi/artifacts/` should stay Git-ignored apart from tracked `.gitkeep` placeholders. The checked-in examples in this repo include a small `httpi/artifacts/` skeleton so the runtime layout is easy to inspect.
+In normal projects, `runmark/artifacts/` should stay Git-ignored apart from tracked `.gitkeep` placeholders. The checked-in examples in this repo include a small `runmark/artifacts/` skeleton so the runtime layout is easy to inspect.
 
 ## Operational properties
 
@@ -106,7 +106,7 @@ In normal projects, `httpi/artifacts/` should stay Git-ignored apart from tracke
 - **Inspect before you mutate.** Use `describe` and `explain variables` to see what will happen ahead of time.
 - **Pause on purpose.** Stop at meaningful checkpoints, inspect artifacts, then explicitly resume.
 - **Redact by default.** Secret-bearing values stay hidden across CLI output, MCP responses, sessions, and artifact reads.
-- **Resume safely.** `httpi` blocks unsafe resume when tracked definitions or `$ENV` inputs drift.
+- **Resume safely.** `runmark` blocks unsafe resume when tracked definitions or `$ENV` inputs drift.
 
 ## Examples
 
@@ -141,13 +141,13 @@ These examples are maintained reference projects with automated coverage behind 
 
 ## MCP server
 
-`httpi mcp` starts a stdio MCP server that exposes the same execution engine as the CLI — same redaction, same artifacts, same runtime model. Point any MCP client (Claude Desktop, Claude Code, Cursor, etc.) at the `httpi` bin with `mcp` as the first argument:
+`runmark mcp` starts a stdio MCP server that exposes the same execution engine as the CLI — same redaction, same artifacts, same runtime model. Point any MCP client (Claude Desktop, Claude Code, Cursor, etc.) at the `runmark` bin with `mcp` as the first argument:
 
 ```json
 {
   "mcpServers": {
-    "httpi": {
-      "command": "httpi",
+    "runmark": {
+      "command": "runmark",
       "args": ["mcp"]
     }
   }
@@ -159,15 +159,15 @@ If you don't want a global install, use `npx`:
 ```json
 {
   "mcpServers": {
-    "httpi": {
+    "runmark": {
       "command": "npx",
-      "args": ["-y", "@exit-zero-labs/httpi", "mcp"]
+      "args": ["-y", "@exit-zero-labs/runmark", "mcp"]
     }
   }
 }
 ```
 
-Because MCP servers are often configured globally, starting `httpi mcp` does **not** pick a project by server cwd. Every MCP tool call must include `projectRoot` pointing at the repository directory that contains `httpi/config.yaml`.
+Because MCP servers are often configured globally, starting `runmark mcp` does **not** pick a project by server cwd. Every MCP tool call must include `projectRoot` pointing at the repository directory that contains `runmark/config.yaml`.
 
 Registered tools:
 
@@ -188,15 +188,15 @@ Registered tools:
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| `No httpi/config.yaml found...` | You are outside a project root. | Run `httpi init`, move into the project directory, or pass `--project-root`. |
+| `No runmark/config.yaml found...` | You are outside a project root. | Run `runmark init`, move into the project directory, or pass `--project-root`. |
 | `validate` reports schema or YAML errors | A tracked file has the wrong shape or syntax. | Fix the reported file and rerun `validate`. |
-| Requests cannot connect | `baseUrl` is wrong or the service is not running. | Update `httpi/env/*.env.yaml` and retry. |
-| Secrets lookup fails | `httpi/artifacts/secrets.yaml` is missing or incomplete. | Create or update the local secret alias. |
+| Requests cannot connect | `baseUrl` is wrong or the service is not running. | Update `runmark/env/*.env.yaml` and retry. |
+| Secrets lookup fails | `runmark/artifacts/secrets.yaml` is missing or incomplete. | Create or update the local secret alias. |
 | `resume` exits with code `3` | Tracked definitions changed or another process still holds the session lock. | Retry after the lock clears; if definitions drifted, start a fresh run instead of forcing resume. |
 
 ## Support
 
-`httpi` is intended to be sustained by donations. GitHub Sponsors is the primary recurring path, and Open Collective is the secondary path for one-time support and public budget visibility:
+`runmark` is intended to be sustained by donations. GitHub Sponsors is the primary recurring path, and Open Collective is the secondary path for one-time support and public budget visibility:
 
 - <https://github.com/sponsors/exit-zero-labs>
 - <https://opencollective.com/exit-zero-labs>

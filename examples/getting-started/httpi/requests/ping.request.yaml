@@ -1,7 +1,0 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/exit-zero-labs/httpi/main/packages/contracts/schemas/request.schema.json
-kind: request
-title: Ping
-method: GET
-url: "{{baseUrl}}/ping"
-expect:
-  status: 200

@@ -1,10 +1,10 @@
 <!-- @format -->
 
-# httpi - Roadmap
+# Runmark - Roadmap
 
 **Status**: Active v0 follow-up
 
-`httpi` already has a working v0 baseline. This roadmap captures the next layers of polish and adoption work, not a promise of dates.
+`runmark` already has a working v0 baseline. This roadmap captures the next layers of polish and adoption work, not a promise of dates.
 
 ## Current focus
 
@@ -61,7 +61,7 @@ The public `examples/` catalog should keep growing, but some example families ar
 
 Even as the roadmap expands, the core architectural constraints stay the same:
 
-- keep `apps/cli` thin — both the CLI and the `httpi mcp` stdio server are pure adapters over the shared engine
-- keep tracked request intent in `httpi/` and runtime state in `httpi/artifacts/`
+- keep `apps/cli` thin — both the CLI and the `runmark mcp` stdio server are pure adapters over the shared engine
+- keep tracked request intent in `runmark/` and runtime state in `runmark/artifacts/`
 - keep definitions pure data with no hidden scripting model
 - prefer explicit, inspectable behavior over magical convenience

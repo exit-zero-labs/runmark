@@ -1,21 +1,21 @@
-# @exit-zero-labs/httpi
+# @exit-zero-labs/runmark
 
 ## 0.4.0
 
 ### Minor Changes
 
-- b43b3ad: Require `projectRoot` on every `httpi mcp` tool call.
+- b43b3ad: Require `projectRoot` on every `runmark mcp` tool call.
 
   MCP servers are often launched outside the target repository, so tool calls no
   longer fall back to server cwd-based project discovery. MCP clients must now
   send `projectRoot` on every tool invocation, pointing at the repository
-  directory that contains `httpi/config.yaml`.
+  directory that contains `runmark/config.yaml`.
 
 ## 0.3.0
 
 ### Minor Changes
 
-- Consolidate runtime state under `httpi/artifacts/`, replace `responses/` with
+- Consolidate runtime state under `runmark/artifacts/`, replace `responses/` with
   `history/`, and store canonical per-attempt `request.json` artifacts that keep
   the full sent request plus the recorded response or error outcome.
 - Make `examples/` the only checked-in reference surface, remove the repo-root
@@ -26,27 +26,27 @@
 
 ### Minor Changes
 
-- 567e696: Consolidate the MCP adapter into the CLI package. `@exit-zero-labs/httpi-mcp`
-  is no longer published — its functionality ships inside `@exit-zero-labs/httpi`
-  as the `httpi mcp` subcommand, which starts the same stdio MCP server backed
+- 567e696: Consolidate the MCP adapter into the CLI package. `@exit-zero-labs/runmark-mcp`
+  is no longer published — its functionality ships inside `@exit-zero-labs/runmark`
+  as the `runmark mcp` subcommand, which starts the same stdio MCP server backed
   by the same shared engine.
 
   **Breaking change for MCP client configs.** Update from:
 
   ```json
-  { "command": "httpi-mcp", "args": [] }
+  { "command": "runmark-mcp", "args": [] }
   ```
 
   to:
 
   ```json
-  { "command": "httpi", "args": ["mcp"] }
+  { "command": "runmark", "args": ["mcp"] }
   ```
 
   or, without a global install:
 
   ```json
-  { "command": "npx", "args": ["-y", "@exit-zero-labs/httpi", "mcp"] }
+  { "command": "npx", "args": ["-y", "@exit-zero-labs/runmark", "mcp"] }
   ```
 
   The MCP SDK is lazy-imported inside the `mcp` subcommand, so CLI-only users

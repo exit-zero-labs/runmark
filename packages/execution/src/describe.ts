@@ -3,8 +3,8 @@ import type {
   CompiledRequestStep,
   CompiledRunSnapshot,
   DescribeRunStep,
-} from "@exit-zero-labs/httpi-contracts";
-import { exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { exitCodes, RunmarkError } from "@exit-zero-labs/runmark-shared";
 
 export function describeCompiledStep(
   step: CompiledRunSnapshot["steps"][number],
@@ -62,7 +62,7 @@ export function selectExplainStep(
   if (stepId) {
     const matchingRequestStep = findRequestStep(compiled, stepId);
     if (!matchingRequestStep) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "STEP_NOT_FOUND",
         `Step ${stepId} was not found in run ${compiled.runId}.`,
         { exitCode: exitCodes.validationFailure },
@@ -86,7 +86,7 @@ export function selectExplainStep(
     return parallelRequestStep.steps[0];
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "RUN_HAS_NO_REQUESTS",
     `Run ${compiled.runId} has no request steps to explain.`,
     { exitCode: exitCodes.validationFailure },

@@ -4,16 +4,16 @@ import { defineConfig } from "astro/config";
 
 // biome-ignore lint/style/noDefaultExport: Astro config files must use a default export.
 export default defineConfig({
-  site: "https://httpi.exitzerolabs.com",
+  site: "https://runmark.exitzerolabs.com",
   integrations: [
     starlight({
-      title: "httpi",
-      description: "File-based HTTP workflows for humans and AI agents.",
+      title: "Runmark",
+      description: "Repo-native HTTP workflows for developers and coding agents.",
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/exit-zero-labs/httpi",
+          href: "https://github.com/exit-zero-labs/runmark",
         },
       ],
       sidebar: [
@@ -25,7 +25,7 @@ export default defineConfig({
           ],
         },
         {
-          label: "Runmark (Draft)",
+          label: "Runmark",
           items: [
             { label: "Brand foundation", slug: "runmark/brand-foundation" },
             {

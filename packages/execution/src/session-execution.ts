@@ -11,7 +11,7 @@ import type {
   EnrichedDiagnostic,
   ExecutionResult,
   SessionRecord,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   acquireSessionLock,
   appendSessionEvent,
@@ -23,8 +23,8 @@ import {
   releaseSessionLock,
   unregisterActiveSession,
   writeSession,
-} from "@exit-zero-labs/httpi-runtime";
-import { toIsoTimestamp } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-runtime";
+import { toIsoTimestamp } from "@exit-zero-labs/runmark-shared";
 import { executeRequestStepIterate } from "./iterate-execution.js";
 import { getSessionStepRecord } from "./project-context.js";
 import { extractJsonPath } from "./request-outputs.js";
@@ -82,7 +82,7 @@ export async function executeSession(
       index += 1
     ) {
       // Per-step cancel check (A2): poll the cancel marker written by the CLI
-      // `httpi cancel` subcommand or MCP `cancel_session` tool.
+      // `runmark cancel` subcommand or MCP `cancel_session` tool.
       if (await isSessionCancelled(projectRoot, session.sessionId)) {
         const cancel = await readSessionCancel(projectRoot, session.sessionId);
         session = {
@@ -591,7 +591,7 @@ function evaluatePollCondition(
   data: unknown,
 ): boolean {
   const value = extractJsonPath(
-    data as import("@exit-zero-labs/httpi-contracts").JsonValue,
+    data as import("@exit-zero-labs/runmark-contracts").JsonValue,
     condition.jsonPath,
   );
   if (value === undefined) {
@@ -617,9 +617,9 @@ function evaluatePollCondition(
 async function executeSwitchStep(
   projectRoot: string,
   session: SessionRecord,
-  step: import("@exit-zero-labs/httpi-contracts").CompiledSwitchStep,
+  step: import("@exit-zero-labs/runmark-contracts").CompiledSwitchStep,
 ): Promise<RequestExecutionOutcome> {
-  const diagnostics: import("@exit-zero-labs/httpi-contracts").EnrichedDiagnostic[] =
+  const diagnostics: import("@exit-zero-labs/runmark-contracts").EnrichedDiagnostic[] =
     [];
   let currentSession = session;
   const value = resolveSwitchRef(step.on, currentSession);
@@ -654,9 +654,9 @@ async function executeSwitchStep(
 }
 
 function pickSwitchBranch(
-  step: import("@exit-zero-labs/httpi-contracts").CompiledSwitchStep,
+  step: import("@exit-zero-labs/runmark-contracts").CompiledSwitchStep,
   value: unknown,
-): import("@exit-zero-labs/httpi-contracts").CompiledRequestStep[] | undefined {
+): import("@exit-zero-labs/runmark-contracts").CompiledRequestStep[] | undefined {
   for (const c of step.cases) {
     const expected = c.when;
     const matched = Array.isArray(expected)

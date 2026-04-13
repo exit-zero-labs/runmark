@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi — Comprehensive improvements proposal
+# Runmark — Comprehensive improvements proposal
 
 **Status**: Proposal  
 **Audience**: Maintainers, contributors, roadmap reviewers  
@@ -11,15 +11,15 @@
 
 ## 1. Purpose
 
-This document captures a structured set of improvements for `httpi` derived from a persona-driven requirements exercise. A fleet of eight technical-PM personas across different verticals — with deliberate weight on AI orchestration, LLM integration, and agent-driven workflows — was asked what they would need from a file-based, Git-tracked HTTP testing tool with CLI + MCP parity. Their answers were then compared against the v0 scope documented in [`architecture.md`](architecture.md).
+This document captures a structured set of improvements for `runmark` derived from a persona-driven requirements exercise. A fleet of eight technical-PM personas across different verticals — with deliberate weight on AI orchestration, LLM integration, and agent-driven workflows — was asked what they would need from a file-based, Git-tracked HTTP testing tool with CLI + MCP parity. Their answers were then compared against the v0 scope documented in [`architecture.md`](architecture.md).
 
 The goal is not a wishlist. The goal is a concrete, opinionated set of changes that:
 
-1. Keep httpi's core principles intact (pure-data YAML, tracked/untracked split, no hidden scripting, CLI/MCP parity, explainability over magic).
+1. Keep runmark's core principles intact (pure-data YAML, tracked/untracked split, no hidden scripting, CLI/MCP parity, explainability over magic).
 2. Close the gaps that consistently block real adoption in AI-heavy and enterprise-heavy workflows.
 3. Are describable as declarative YAML additions and engine features — no Turing-complete DSL, no embedded scripts, no cloud dependency.
 
-Each improvement is presented with **what / why / how**, a check against httpi's principles, and a proposed priority tier.
+Each improvement is presented with **what / why / how**, a check against runmark's principles, and a proposed priority tier.
 
 ---
 
@@ -38,7 +38,7 @@ Eight PM personas were simulated in parallel sub-agents. Each was asked to descr
 | P7 | LLM observability / evaluation platform | AI infra | Heavy |
 | P8 | Fintech / payments API | Baseline control | Medium |
 
-Five of the eight are direct AI-infra personas. P4 (coding-agent platform) and P2 (orchestration) represent httpi's nearest-term primary users. P5 and P8 act as enterprise/compliance anchors so the AI improvements do not drift away from operational reality. This gives the synthesis a bias toward AI orchestration while keeping the tool trustworthy in regulated settings.
+Five of the eight are direct AI-infra personas. P4 (coding-agent platform) and P2 (orchestration) represent runmark's nearest-term primary users. P5 and P8 act as enterprise/compliance anchors so the AI improvements do not drift away from operational reality. This gives the synthesis a bias toward AI orchestration while keeping the tool trustworthy in regulated settings.
 
 ---
 
@@ -129,7 +129,7 @@ Every improvement below is designed to honor all five.
 | Latency percentile assertions | ❌ none | 3/8 | Medium |
 | Environment guards (prod gate) | ❌ none | 3/8 | **Critical** for P5/P8 |
 | Audit log export with signed manifest | ❌ none | 2/8 | Medium for enterprise |
-| Scaffolding (`httpi new`) | ⚠️ only `init` | 2/8 (P4 strong) | Medium |
+| Scaffolding (`runmark new`) | ⚠️ only `init` | 2/8 (P4 strong) | Medium |
 | Lint | ❌ none | 2/8 | Medium |
 | Artifact summarization on read | ❌ none | 1/8 (P4 strong) | **Critical** for agents |
 | Single-step replay | ❌ none | 1/8 (P4 strong) | Medium |
@@ -203,7 +203,7 @@ New engine events: `stream.chunk.received`, `stream.first-byte`, `stream.complet
 
 **Principle check.** Pure data. Artifacts are still JSONL and inspectable. Redaction applies to each chunk. MCP exposes `get_stream_chunks(projectRoot, sessionId, stepId, range)` with the same redaction as `read_artifact`.
 
-**Priority.** **P0** for AI adoption. Without this, five of eight personas cannot use httpi at all.
+**Priority.** **P0** for AI adoption. Without this, five of eight personas cannot use runmark at all.
 
 ---
 
@@ -236,7 +236,7 @@ kind: run
 timeoutMs: 3600000
 ```
 
-`httpi cancel <sessionId>` and MCP `cancel_session` tools transition the session to `interrupted` cleanly, flushing already-captured chunks.
+`runmark cancel <sessionId>` and MCP `cancel_session` tools transition the session to `interrupted` cleanly, flushing already-captured chunks.
 
 **Principle check.** Explicit, auditable, no auto-retry. Matches existing `interrupted` state semantics.
 
@@ -274,13 +274,13 @@ body:
 ```yaml
 response:
   mode: binary
-  saveTo: "./httpi/artifacts/downloads/{{sessionId}}/report.csv"
+  saveTo: "./runmark/artifacts/downloads/{{sessionId}}/report.csv"
   maxBytes: 536870912
 ```
 
-Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a path; the file itself may live outside `httpi/artifacts/history/` to keep the JSONL/manifest small.
+Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a path; the file itself may live outside `runmark/artifacts/history/` to keep the JSONL/manifest small.
 
-**Principle check.** Runtime-only artifacts; tracked fixtures live under `httpi/bodies/` as before. Redaction rules extend to "strip by path" for known binary fields.
+**Principle check.** Runtime-only artifacts; tracked fixtures live under `runmark/bodies/` as before. Redaction rules extend to "strip by path" for known binary fields.
 
 **Priority.** **P1** (P3/P6/P8 must-have).
 
@@ -294,7 +294,7 @@ Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a 
 > still `[ ]` require either the fixture harness or a follow-up fix.
 >
 > **Dissent on file:** PM and QA both grade B+ because a dedicated
-> fixture-server test suite is not yet in `testing/httpi/` — the functional
+> fixture-server test suite is not yet in `testing/runmark/` — the functional
 > paths are landed but not yet asserted by a running test. Accepted per
 > "A/A+ with documented dissent" exit rule. Tracked as a scope-extension
 > item for the next test-coverage sweep.
@@ -307,10 +307,10 @@ Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a 
 - [x] **A1 redaction.** Code: `packages/execution/src/request-step-execution.ts` redacts chunk previews, assembledText, assembledJson, assembledLast before assertions; `packages/execution/src/request-artifacts.ts` re-redacts at artifact write. `redactJsonValue` walks JSON recursively. Fixture pending.
 - [x] **A1 artifact layout.** Code: `packages/runtime/src/artifacts.ts` writes `steps/<stepId>/attempt-<N>/stream/chunks.jsonl` and `stream/assembled.(json|txt)` with manifest entries. Fixture pending.
 - [x] **A1 engine events.** Code: `packages/execution/src/request-step-execution.ts` emits `stream.first-byte` / `stream.chunk.received` / `stream.completed` / `stream.failed` via `appendSessionEvent` with monotonic timestamps. Fixture pending.
-- [x] **A1 MCP parity.** Code: `apps/cli/src/mcp.ts` (loaded by the `httpi mcp` subcommand) registers `get_stream_chunks(projectRoot, sessionId, stepId, rangeStart?, rangeEnd?)` backed by `packages/execution/src/index.ts` `getSessionStreamChunks` → `packages/runtime/src/artifacts.ts` `readStreamChunks` (reads post-redaction on-disk artifact). Fixture pending.
+- [x] **A1 MCP parity.** Code: `apps/cli/src/mcp.ts` (loaded by the `runmark mcp` subcommand) registers `get_stream_chunks(projectRoot, sessionId, stepId, rangeStart?, rangeEnd?)` backed by `packages/execution/src/index.ts` `getSessionStreamChunks` → `packages/runtime/src/artifacts.ts` `readStreamChunks` (reads post-redaction on-disk artifact). Fixture pending.
 - [x] **A2 per-step timeout.** Code: `packages/http/src/index.ts` `AbortSignal.timeout(request.timeoutMs)` combined into single `AbortController`; failure classified as `timeout`. Fixture pending.
 - [x] **A2 per-run timeout.** Code: `CompiledRunSnapshot.runTimeoutMs` propagated from `RunDefinition.timeoutMs`; `packages/execution/src/session-execution.ts` polls wall-clock at each step boundary and emits `session.interrupted` with `message: "run timeout Xms"`. Fixture pending.
-- [x] **A2 cancellation.** Code: `packages/runtime/src/session-cancel.ts` marker file + `requestSessionCancel` / `readSessionCancel` / `isSessionCancelled`; `executeSession` polls at step boundaries; `executeHttpRequest` `readWithCancelPoll` races `reader.read()` against a 100 ms cancel poll to abort mid-stream. CLI `httpi cancel` + MCP `cancel_session` both go through `cancelSessionRun`. Fixture pending.
+- [x] **A2 cancellation.** Code: `packages/runtime/src/session-cancel.ts` marker file + `requestSessionCancel` / `readSessionCancel` / `isSessionCancelled`; `executeSession` polls at step boundaries; `executeHttpRequest` `readWithCancelPoll` races `reader.read()` against a 100 ms cancel poll to abort mid-stream. CLI `runmark cancel` + MCP `cancel_session` both go through `cancelSessionRun`. Fixture pending.
 - [x] **A2 `onSignal` behavior.** Code: `installSignalCancelHandler` installs SIGINT/SIGTERM, writes cancel markers, awaits flush via `listActiveSessions()` drain poll (1500 ms grace). Fixture pending.
 - [x] **A3 multipart upload.** Code: `packages/execution/src/request-body.ts` resolves multipart parts with RFC 2046 boundary generation (pre-existing; human-review box 316 already `[x]`). Fixture pending.
 - [x] **A3 binary body.** Code: `packages/execution/src/request-body.ts` handles `kind: binary`; `packages/http/src/index.ts` threads binary buffer into fetch body. Fixture pending.
@@ -324,7 +324,7 @@ Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a 
 - [x] Walk through the `packages/http` streaming implementation and verify that chunk capture happens inside the same code path regardless of whether the caller is CLI or MCP (no forked logic).
 - [x] Verify that `cancel` during a `stream` response correctly aborts the underlying `fetch` body reader and does not leave a dangling TCP connection (inspect with a packet capture or mock server connection count).
 - [x] Review multipart boundary generation for correctness (RFC 2046 compliance). Confirm no boundary collision with file content.
-- [x] Confirm binary `saveTo` paths that escape the `httpi/artifacts/` directory are rejected or warned about. Implemented by `warnIfSaveToEscapesHttpi` in `packages/definitions/src/request-parser.ts`: absolute paths and `..`-traversal (OS-agnostic normalization) emit an ERROR-level `BINARY_SAVE_TO_UNSAFE_PATH`; paths inside the project tree but outside `httpi/artifacts/` emit a WARNING-level `BINARY_SAVE_TO_OUTSIDE_HTTPI`.
+- [x] Confirm binary `saveTo` paths that escape the `runmark/artifacts/` directory are rejected or warned about. Implemented by `warnIfSaveToEscapesRunmark` in `packages/definitions/src/request-parser.ts`: absolute paths and `..`-traversal (OS-agnostic normalization) emit an ERROR-level `BINARY_SAVE_TO_UNSAFE_PATH`; paths inside the project tree but outside `runmark/artifacts/` emit a WARNING-level `BINARY_SAVE_TO_OUTSIDE_RUNMARK`.
 
 ---
 
@@ -388,7 +388,7 @@ expect:
 
 Project-level config can declare default schema directories.
 
-**Principle check.** Tracked schemas live under `httpi/schemas/` next to the request files that reference them. Identity stays path-derived.
+**Principle check.** Tracked schemas live under `runmark/schemas/` next to the request files that reference them. Identity stays path-derived.
 
 **Priority.** **P0**.
 
@@ -413,9 +413,9 @@ expect:
       - path: $.data[*].updatedAt
 ```
 
-`httpi snapshot accept <sessionId> [--step ...]` writes the new snapshot into the tracked folder so the change is PR-reviewable. The tool emits a JSON Patch diff in the structured assertion result.
+`runmark snapshot accept <sessionId> [--step ...]` writes the new snapshot into the tracked folder so the change is PR-reviewable. The tool emits a JSON Patch diff in the structured assertion result.
 
-**Principle check.** Snapshots are tracked in `httpi/snapshots/` — the point is PR review. Masking rules are declarative.
+**Principle check.** Snapshots are tracked in `runmark/snapshots/` — the point is PR review. Masking rules are declarative.
 
 **Priority.** **P1** (core for regression workflows; can ship after B1/B2).
 
@@ -435,7 +435,7 @@ expect:
     contentType: text
     matches:
       kind: llm-judge
-      judge: claude-sonnet-4-6          # resolved via httpi/config.yaml
+      judge: claude-sonnet-4-6          # resolved via runmark/config.yaml
       rubric: rubrics/helpfulness.md
       passIf:
         verdict: pass
@@ -445,7 +445,7 @@ expect:
         ttl: 30d
 ```
 
-The judge adapter itself is a configured provider in `httpi/config.yaml`. It calls an HTTP endpoint (OpenAI, Anthropic, local llama.cpp) — httpi does not embed a judge model. Verdict cache lives under `httpi/artifacts/judges/` and is disposable.
+The judge adapter itself is a configured provider in `runmark/config.yaml`. It calls an HTTP endpoint (OpenAI, Anthropic, local llama.cpp) — runmark does not embed a judge model. Verdict cache lives under `runmark/artifacts/judges/` and is disposable.
 
 **Principle check.** The rubric is tracked; the cache is runtime. No scripts. The judge is a configured HTTP call, same engine path as any other request.
 
@@ -535,7 +535,7 @@ Aggregate artifacts: per-iteration JSONL plus a `summary.json` with percentile m
 - [x] **B2 valid schema.** Reference a JSON Schema file. Send a conforming response; verify pass. Mutate one field to violate the schema; verify the assertion fails with a message that includes the JSON Schema validation error path.
 - [x] **B2 missing schema file.** Reference a non-existent schema file. Verify a structured diagnostic with `file:line` pointing to the `schema:` key in the YAML.
 - [x] **B2 draft version.** Verify `draft: "2020-12"` is respected and a schema using 2020-12 features (e.g., `$dynamicRef`) validates correctly. Verify an unsupported draft string produces a diagnostic.
-- [x] **B3 snapshot create.** Run `httpi snapshot accept <sessionId> --step <stepId>` when no snapshot file exists. Verify the file is created at the declared path under `httpi/snapshots/` with masked fields replaced by a stable placeholder.
+- [x] **B3 snapshot create.** Run `runmark snapshot accept <sessionId> --step <stepId>` when no snapshot file exists. Verify the file is created at the declared path under `runmark/snapshots/` with masked fields replaced by a stable placeholder.
 - [x] **B3 snapshot pass.** Re-run the same request. Verify the snapshot comparison passes with an empty JSON Patch diff.
 - [x] **B3 snapshot fail.** Modify the upstream response. Verify the assertion fails and the structured result includes a JSON Patch (RFC 6902) diff with the correct `op`, `path`, and `value`.
 - [x] **B3 mask.** Add a `mask` path for a volatile field (e.g., `$.requestId`). Verify that field is excluded from the diff even when its value changes.
@@ -721,7 +721,7 @@ Artifacts for each iteration land under `steps/process-orders/iterations/<index>
   timeoutMs: 600000
 ```
 
-`httpi` writes the captured webhook payload into the step's artifacts. The receiver is strictly local, dies with the session, and never listens on a public interface without explicit opt-in.
+`runmark` writes the captured webhook payload into the step's artifacts. The receiver is strictly local, dies with the session, and never listens on a public interface without explicit opt-in.
 
 **Principle check.** Declarative. The webhook URL is exposed as an ordinary extracted value via `steps.<id>.webhook.url`. Verification is a built-in vocabulary, not a user-supplied script.
 
@@ -773,7 +773,7 @@ Parent and child sessions both exist; the parent session's `steps/onboard-tenant
       reservationId: "{{steps.reserve-inventory.extracted.id}}"
 ```
 
-Compensations run during a `failed` → operator-initiated `rollback` transition, surfaced as `httpi rollback <sessionId>`. They are NOT automatic; the operator (human or agent) must trigger them, preserving the "explicit, inspectable" rule.
+Compensations run during a `failed` → operator-initiated `rollback` transition, surfaced as `runmark rollback <sessionId>`. They are NOT automatic; the operator (human or agent) must trigger them, preserving the "explicit, inspectable" rule.
 
 **Principle check.** Explicit, operator-driven. Nothing runs silently.
 
@@ -820,7 +820,7 @@ Compensations run during a `failed` → operator-initiated `rollback` transition
 >   timeout, socket cleanup on all exit paths.
 > - **C5 `subRun`** — child session with frozen snapshot, cycle detection
 >   at compile time, pause-propagation up the parent chain.
-> - **C6 compensate / `httpi rollback`** — operator-driven reverse-order
+> - **C6 compensate / `runmark rollback`** — operator-driven reverse-order
 >   execution of declared compensation requests for completed steps.
 >
 > PM/QA dissent matches Groups A/B: B+ on fixture coverage.
@@ -849,8 +849,8 @@ Compensations run during a `failed` → operator-initiated `rollback` transition
 - [ ] **C5 sub-run invocation.** Create a parent run that invokes a child run file via `kind: subRun`. Verify the child session is created, its artifacts are captured, and the parent's `steps/<subRunId>/` contains a `childSessionId` pointer. Verify `export` correctly surfaces extracted values to the parent.
 - [ ] **C5 cycle detection.** Create run A that invokes run B, and run B that invokes run A. Verify the engine refuses with a diagnostic at compile time, not a stack overflow at runtime.
 - [ ] **C5 pause propagation.** Place a `pause` step inside the child run. Verify the parent run also transitions to `paused` with a `nextStep` path that includes the child's pause location.
-- [ ] **C6 compensation execution order.** Create a run with steps A → B → C, each with a `compensate` reference. Fail at step C. Trigger `httpi rollback <sessionId>`. Verify compensations run in reverse order: C-compensate, B-compensate, A-compensate. Verify artifacts record each compensation.
-- [ ] **C6 compensation is NOT automatic.** Fail a run. Verify compensations do NOT execute until the operator explicitly invokes `httpi rollback`. Verify the session remains in `failed` state, not `rolled-back`.
+- [ ] **C6 compensation execution order.** Create a run with steps A → B → C, each with a `compensate` reference. Fail at step C. Trigger `runmark rollback <sessionId>`. Verify compensations run in reverse order: C-compensate, B-compensate, A-compensate. Verify artifacts record each compensation.
+- [ ] **C6 compensation is NOT automatic.** Fail a run. Verify compensations do NOT execute until the operator explicitly invokes `runmark rollback`. Verify the session remains in `failed` state, not `rolled-back`.
 - [x] **C7 bounded parallel.** Create a `parallel` block with 10 children and `concurrency: 3`. Fixture server tracks concurrent connections. Verify at most 3 connections are open simultaneously. Verify all 10 children complete.
 - [x] **C7 artifact ordering.** Verify artifact directories under the parallel step are deterministically ordered (by declared order, not completion order).
 
@@ -872,7 +872,7 @@ Compensations run during a `failed` → operator-initiated `rollback` transition
 
 **Why.** P1, P5, P6, P8 explicitly; P2, P7 implicitly.
 
-**How.** A single `auth` block with tagged schemes, composable via `httpi/blocks/auth/*.yaml`:
+**How.** A single `auth` block with tagged schemes, composable via `runmark/blocks/auth/*.yaml`:
 
 ```yaml
 auth:
@@ -933,9 +933,9 @@ auth:
       exp: "+5m"
 ```
 
-Token caches are stored under `httpi/artifacts/auth/` keyed by `cacheKey`. Tokens are never written to tracked files or unredacted artifacts.
+Token caches are stored under `runmark/artifacts/auth/` keyed by `cacheKey`. Tokens are never written to tracked files or unredacted artifacts.
 
-**Principle check.** Each scheme is a closed vocabulary. Signing templates use a documented mini-grammar, not user code. Blocks under `httpi/blocks/auth/` stay pure data.
+**Principle check.** Each scheme is a closed vocabulary. Signing templates use a documented mini-grammar, not user code. Blocks under `runmark/blocks/auth/` stay pure data.
 
 **Priority.** **P0** for `bearer`, `basic`, `oauth2-client-credentials`, `hmac`, and `oauth2-authorization-code` (local redirect). **P1** for `aws-sigv4`, `mtls`, `jwt`. **P2** for device-code, on-behalf-of.
 
@@ -957,17 +957,17 @@ Token caches are stored under `httpi/artifacts/auth/` keyed by `cacheKey`. Token
 
 #### D3. Pluggable secret resolvers
 
-**What.** Add resolver kinds beyond `$ENV:NAME` and `httpi/artifacts/secrets.yaml`: HashiCorp Vault, AWS Secrets Manager, 1Password CLI, Azure Key Vault, GCP Secret Manager, and the OS keychain.
+**What.** Add resolver kinds beyond `$ENV:NAME` and `runmark/artifacts/secrets.yaml`: HashiCorp Vault, AWS Secrets Manager, 1Password CLI, Azure Key Vault, GCP Secret Manager, and the OS keychain.
 
 **Why.** P5, P8 block adoption without this. P6 soft-requires it.
 
-**How.** A resolver table in `httpi/config.yaml` (NOT `httpi/artifacts/`, because resolver *configuration* is project intent; only the resolved values are runtime-only):
+**How.** A resolver table in `runmark/config.yaml` (NOT `runmark/artifacts/`, because resolver *configuration* is project intent; only the resolved values are runtime-only):
 
 ```yaml
 secrets:
   resolvers:
     - kind: env
-      prefix: HTTPI_
+      prefix: RUNMARK_
     - kind: vault
       address: "{{$ENV:VAULT_ADDR}}"
       auth: approle
@@ -1003,11 +1003,11 @@ Resolved values never touch disk. They are redacted in all event and artifact ou
 **How.**
 
 ```yaml
-# httpi/env/prod.env.yaml
+# runmark/env/prod.env.yaml
 schemaVersion: 1
 title: Production
 guards:
-  requireEnv: HTTPI_CONFIRM_PROD=1
+  requireEnv: RUNMARK_CONFIRM_PROD=1
   requireFlag: "--i-know-what-im-doing"
   blockParallelAbove: 1
   blockIfBranchNotIn: [main]
@@ -1044,7 +1044,7 @@ Running against a guarded env without meeting conditions fails with exit code `2
 > **Status (2026-04-12).** Shipped in the pre-loop scaffold and retained: D1
 > `bearer`, `basic`, `header`, `oauth2-client-credentials`, `hmac` schemes in
 > `packages/contracts/src/index.ts` / `packages/execution/src/request-resolution.ts`;
-> D3 env + `httpi/artifacts/secrets.yaml` resolvers (`packages/runtime/src/secrets.ts`);
+> D3 env + `runmark/artifacts/secrets.yaml` resolvers (`packages/runtime/src/secrets.ts`);
 > D4 environment guards (`envGuards.blockParallelAbove` enforced in
 > `executeParallelStep`, `guards` block parsed in env files).
 >
@@ -1066,20 +1066,20 @@ Running against a guarded env without meeting conditions fails with exit code `2
 
 - [x] **D1 `bearer` scheme.** Configure `auth.scheme: bearer` with a token variable. Verify the outbound request has `Authorization: Bearer <token>`. Verify the token value is redacted in all artifacts and CLI output.
 - [x] **D1 `basic` scheme.** Configure basic auth. Verify the `Authorization: Basic <base64>` header is correct. Verify the decoded credential never appears in artifacts.
-- [x] **D1 `oauth2-client-credentials`.** Set up a mock OAuth2 token endpoint. Verify httpi calls the token endpoint with correct `grant_type`, `client_id`, `client_secret`, and `scope`. Verify the access token is attached to the subsequent request. Verify the token is cached under `httpi/artifacts/auth/` keyed by `cacheKey`. Run a second request; verify no second token call (cache hit).
+- [x] **D1 `oauth2-client-credentials`.** Set up a mock OAuth2 token endpoint. Verify runmark calls the token endpoint with correct `grant_type`, `client_id`, `client_secret`, and `scope`. Verify the access token is attached to the subsequent request. Verify the token is cached under `runmark/artifacts/auth/` keyed by `cacheKey`. Run a second request; verify no second token call (cache hit).
 - [ ] **D1 `oauth2-authorization-code` (local redirect).** Verify the local listener starts, an authorize URL is generated correctly (with PKCE `code_challenge` if applicable), and after simulating the redirect callback, the token exchange completes. Verify the token is cached and the listener shuts down.
 - [x] **D1 `hmac` signing.** Configure HMAC with a known secret and signing template. Verify the generated signature matches a reference implementation's output for the same inputs. Verify `X-Signature` and `X-Timestamp` headers are present on the outbound request.
 - [ ] **D1 `aws-sigv4`.** Configure AWS SigV4 with static credentials. Verify the `Authorization` header matches the expected SigV4 signature for the given method, path, headers, and body (compare against AWS SDK reference output).
 - [ ] **D1 `mtls`.** Configure mTLS with test certificates. Verify the TLS handshake uses the client cert (inspect via mock server TLS context). Verify connections fail gracefully with a clear diagnostic when the cert/key is invalid or the CA doesn't match.
 - [ ] **D1 `jwt` sign.** Configure JWT signing with RS256 and a test private key. Verify the generated JWT decodes correctly with the matching public key, contains the declared claims (`iss`, `aud`), and `exp` is correctly computed from `"+5m"` relative to current time.
 - [x] **D1 secret redaction.** For every auth scheme: verify that secrets (`clientSecret`, `hmacSecret`, `privateKey`, `keyPassphrase`, token values) NEVER appear in artifacts, CLI output, MCP responses, or event payloads. Search all artifact files for the literal secret value; assert zero matches.
-- [ ] **D2 auto-refresh.** Configure an OAuth2 session with a token that expires immediately. Fixture returns 401 on first attempt. Verify httpi refreshes the token (one call to the token endpoint with `grant_type=refresh_token`) and retries the step. Verify the retry succeeds with the new token. Verify artifacts show two attempts: one 401, one 200.
+- [ ] **D2 auto-refresh.** Configure an OAuth2 session with a token that expires immediately. Fixture returns 401 on first attempt. Verify runmark refreshes the token (one call to the token endpoint with `grant_type=refresh_token`) and retries the step. Verify the retry succeeds with the new token. Verify artifacts show two attempts: one 401, one 200.
 - [ ] **D2 refresh disabled.** Set `refreshOn401: false`. Verify a 401 is treated as a terminal failure with no refresh attempt.
 - [ ] **D2 refresh failure.** Mock the token endpoint to also return an error on refresh. Verify the step fails with a diagnostic that names the refresh failure, not just "401".
 - [ ] **D3 resolver chain.** Configure three resolvers: `env`, `vault` (mock), `onepassword` (mock). Set a secret in the env resolver only. Verify it resolves. Remove it from env, add it to vault mock. Verify vault supplies it. Verify the resolved value never touches disk.
 - [ ] **D3 resolution failure.** Reference a secret that no resolver can provide. Verify a structured diagnostic listing which resolvers were tried and what each returned.
-- [ ] **D3 resolver config in tracked file.** Verify `secrets.resolvers` config lives in `httpi/config.yaml` (tracked), not in `httpi/artifacts/`. Verify the resolved values are runtime-only and never written to any tracked file.
-- [x] **D4 environment guard — missing env var.** Configure `guards.requireEnv: HTTPI_CONFIRM_PROD=1`. Run without setting the variable. Verify exit code 2 and a structured diagnostic naming the missing guard condition.
+- [ ] **D3 resolver config in tracked file.** Verify `secrets.resolvers` config lives in `runmark/config.yaml` (tracked), not in `runmark/artifacts/`. Verify the resolved values are runtime-only and never written to any tracked file.
+- [x] **D4 environment guard — missing env var.** Configure `guards.requireEnv: RUNMARK_CONFIRM_PROD=1`. Run without setting the variable. Verify exit code 2 and a structured diagnostic naming the missing guard condition.
 - [x] **D4 environment guard — wrong branch.** Configure `guards.blockIfBranchNotIn: [main]`. Run on a feature branch. Verify exit code 2.
 - [ ] **D4 environment guard — MCP approval.** Via MCP, attempt to run against a guarded env. Verify the response includes a required-approval payload with the guard conditions listed.
 - [x] **D4 all guards combined.** Configure multiple guards simultaneously. Verify ALL must pass, not just one.
@@ -1090,7 +1090,7 @@ Running against a guarded env without meeting conditions fails with exit code `2
 **Human review checkpoints:**
 
 - [x] Review every auth scheme implementation for secret lifecycle: confirm the secret is resolved into memory, used for header/signature computation, and then NOT stored anywhere (no writing to disk, no logging, no inclusion in event payloads).
-- [ ] Verify `httpi/artifacts/auth/` token cache files are encrypted or at minimum excluded from any export/audit command. Confirm they are cleaned up on `httpi clean`.
+- [ ] Verify `runmark/artifacts/auth/` token cache files are encrypted or at minimum excluded from any export/audit command. Confirm they are cleaned up on `runmark clean`.
 - [x] Review the HMAC signing template mini-grammar parser. Confirm it is a closed substitution grammar (`{method}`, `{path}`, `{timestamp}`, `{body.sha256}`) — no arbitrary expressions, no `eval`.
 - [ ] Verify `oauth2-authorization-code` local redirect listener validates the `state` parameter to prevent CSRF.
 - [ ] Review D4 guard evaluation order. Confirm guards are evaluated BEFORE any request compilation or secret resolution occurs — a guarded env must not trigger vault calls.
@@ -1111,7 +1111,7 @@ Running against a guarded env without meeting conditions fails with exit code `2
 - `run_definition`, `resume_session`, and `get_session_state` return a fixed, bounded result shape with `artifactIndex` pointers instead of inlined bodies.
 - `read_artifact` adds optional `summary: true` (default) which returns top-level keys, types, array lengths, and a truncated preview.
 - Add `read_artifact` with `jmespath: "..."` or `jsonPath: "..."` for targeted extraction.
-- CLI `httpi artifacts read` gains `--summary`, `--full`, and `--jq <expr>` flags.
+- CLI `runmark artifacts read` gains `--summary`, `--full`, and `--jq <expr>` flags.
 
 **Principle check.** Parity: CLI and MCP expose identical summarization flags. Redaction still applies.
 
@@ -1150,7 +1150,7 @@ confirmation:
       allow: true
 ```
 
-Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confirmMutating: true` proceed without pausing. Otherwise the run reaches a synthetic pause step before each mutating attempt and surfaces a structured approval request.
+Runs launched with `runmark run --confirm-all` or MCP `run_definition` with `confirmMutating: true` proceed without pausing. Otherwise the run reaches a synthetic pause step before each mutating attempt and surfaces a structured approval request.
 
 **Principle check.** Matches the existing "inspectable over magical" principle. Pause state is a first-class construct already.
 
@@ -1162,10 +1162,10 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 **What.** New CLI + MCP commands that generate schema-valid request, run, env, and block files:
 
-- `httpi new request <path> [--method POST] [--url ...]`
-- `httpi new run <path> --from <requestId> [...]`
-- `httpi new env <name>`
-- `httpi new block auth/<name>`
+- `runmark new request <path> [--method POST] [--url ...]`
+- `runmark new run <path> --from <requestId> [...]`
+- `runmark new env <name>`
+- `runmark new block auth/<name>`
 
 **Why.** P4: "Agents get it right on the first write instead of thrashing."
 
@@ -1179,7 +1179,7 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 #### E5. Single-step replay with captured variable snapshot
 
-**What.** `httpi replay <sessionId> --step <stepId>` re-executes exactly one step against the variable snapshot captured at the original attempt, producing a new attempt artifact sibling.
+**What.** `runmark replay <sessionId> --step <stepId>` re-executes exactly one step against the variable snapshot captured at the original attempt, producing a new attempt artifact sibling.
 
 **Why.** P4: "The innermost debug loop." P1: "Incident replay from days into minutes."
 
@@ -1205,7 +1205,7 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 ---
 
-#### E7. `httpi lint`
+#### E7. `runmark lint`
 
 **What.** A static linter that flags unused variables, unreachable steps, missing assertions, orphan fixtures, inconsistent capture policies, and any secret literal in tracked files.
 
@@ -1231,10 +1231,10 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 > **Deferred to scope-extension work:**
 > - **E1 compact MCP responses** — `read_artifact` summary mode, jsonPath/jmespath slicing, token-budget bounded output across `run_definition`/`resume_session`/`get_session_state`.
 > - **E3 mutation gating** — `MutationConfirmation` type exists in contracts but executor wiring + `--confirm-all` + MCP approval payload remain.
-> - **E4 scaffolds** — `httpi new request|run|env|block` + MCP `scaffold_definition` tool.
-> - **E5 single-step replay** — `variables.snapshot.json` capture + `httpi replay <sessionId> --step <stepId>`.
+> - **E4 scaffolds** — `runmark new request|run|env|block` + MCP `scaffold_definition` tool.
+> - **E5 single-step replay** — `variables.snapshot.json` capture + `runmark replay <sessionId> --step <stepId>`.
 > - **E6 `definedAt` provenance + assertion-failure variable traces.**
-> - **E7 `httpi lint`** — new `packages/lint` package; unused-var / unreachable / missing-assertion / secret-literal rules.
+> - **E7 `runmark lint`** — new `packages/lint` package; unused-var / unreachable / missing-assertion / secret-literal rules.
 >
 > PM/QA pin at B+ on fixture coverage, matching prior groups.
 
@@ -1243,24 +1243,24 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 - [ ] **E1 compact MCP response.** Execute a request that returns a 50 KB JSON body via MCP `run_definition`. Verify the response does NOT inline the body. Verify it includes `artifactIndex` pointers, status, duration, and assertion results. Measure the response token count; assert it is < 2000 tokens.
 - [ ] **E1 `read_artifact` summary mode.** Call `read_artifact(projectRoot, sessionId, relativePath, summary: true)`. Verify the output includes top-level keys, types, array lengths, and a truncated preview. Verify the full body is NOT returned.
 - [ ] **E1 `read_artifact` with JMESPath/JSONPath.** Call `read_artifact(projectRoot, sessionId, relativePath, jmespath: "user.name")`. Verify only the extracted value is returned, not the full body.
-- [ ] **E1 CLI parity.** Run `httpi artifacts read <path> --summary` and `--full`. Verify `--summary` matches the MCP summary mode output. Verify `--jq` produces equivalent results to MCP's `jmespath`.
+- [ ] **E1 CLI parity.** Run `runmark artifacts read <path> --summary` and `--full`. Verify `--summary` matches the MCP summary mode output. Verify `--jq` produces equivalent results to MCP's `jmespath`.
 - [x] **E2 structured diagnostic — validation error.** Load a YAML file with a typo in a required field. Verify the diagnostic includes `{ file, line, column, code, message, hint }` and that `file:line` points to the exact YAML key.
 - [x] **E2 structured diagnostic — assertion failure.** Run an assertion that fails. Verify the diagnostic includes `file:line` pointing to the `expect:` block in the YAML definition.
 - [x] **E2 structured diagnostic — drift detection.** Modify a tracked file between pause and resume. Verify the drift diagnostic includes `file:line` for the changed definition.
-- [x] **E2 CLI output format.** Verify CLI prints diagnostics with a `file:line` prefix (e.g., `httpi/requests/users/get.yaml:12: error[E001]: ...`). Verify MCP returns them as structured JSON objects.
+- [x] **E2 CLI output format.** Verify CLI prints diagnostics with a `file:line` prefix (e.g., `runmark/requests/users/get.yaml:12: error[E001]: ...`). Verify MCP returns them as structured JSON objects.
 - [ ] **E3 mutation gating — default pause.** Create a run with a `POST` step. Run without `--confirm-all`. Verify the run pauses before the POST step with a structured approval request. Resume; verify the step executes.
 - [ ] **E3 mutation gating — `allow` override.** Set `confirmation.overrides: [{ step: login, allow: true }]` on a POST step. Verify it does NOT pause.
 - [ ] **E3 mutation gating — `--confirm-all`.** Run with `--confirm-all`. Verify no mutation pauses occur.
 - [ ] **E3 mutation gating — `mutates: true` flag.** Mark a GET request with `mutates: true`. Verify it triggers the mutation gate.
 - [ ] **E3 MCP approval payload.** Via MCP, trigger a mutation pause. Verify the response includes the step details, method, URL, and a structured approval field the agent can act on.
-- [ ] **E4 scaffold — request.** Run `httpi new request users/get-me --method GET --url "{{baseUrl}}/me"`. Verify the file is created at the correct path, contains valid YAML with a `$schema` comment, uses the declared method and URL, and passes `httpi lint` (once E7 exists) or at minimum loads without validation errors.
-- [ ] **E4 scaffold — run.** Run `httpi new run users/crud --from users/get-me`. Verify the run file references the request by path-derived ID.
+- [ ] **E4 scaffold — request.** Run `runmark new request users/get-me --method GET --url "{{baseUrl}}/me"`. Verify the file is created at the correct path, contains valid YAML with a `$schema` comment, uses the declared method and URL, and passes `runmark lint` (once E7 exists) or at minimum loads without validation errors.
+- [ ] **E4 scaffold — run.** Run `runmark new run users/crud --from users/get-me`. Verify the run file references the request by path-derived ID.
 - [ ] **E4 scaffold — MCP parity.** Execute `scaffold_definition` via MCP. Verify the output matches CLI behavior.
-- [ ] **E5 single-step replay.** Run a session. Then run `httpi replay <sessionId> --step <stepId>`. Verify a new `attempt-N/` folder is created under the step's artifacts with the replayed response. Verify the parent session state does NOT change (remains `completed` or whatever it was).
+- [ ] **E5 single-step replay.** Run a session. Then run `runmark replay <sessionId> --step <stepId>`. Verify a new `attempt-N/` folder is created under the step's artifacts with the replayed response. Verify the parent session state does NOT change (remains `completed` or whatever it was).
 - [ ] **E5 variable snapshot.** Verify `variables.snapshot.json` exists for the step. Modify an environment variable after the original run. Replay; verify the replayed request uses the ORIGINAL variable values from the snapshot, not the current env.
 - [ ] **E6 variable provenance.** Run `explain_variables` for a resolved value. Verify the output includes `{ value, source, definedAt }` where `definedAt` is `file:line` for tracked values, `env-var:NAME` for env values, and `step.id.extracted.field` for extracted values.
 - [ ] **E6 provenance in assertion failures.** Trigger an assertion failure that references a variable. Verify the diagnostic message includes the provenance of that variable.
-- [ ] **E7 lint — unused variable.** Declare a variable in env that is never referenced. Run `httpi lint`. Verify a warning diagnostic with `file:line` pointing to the unused declaration.
+- [ ] **E7 lint — unused variable.** Declare a variable in env that is never referenced. Run `runmark lint`. Verify a warning diagnostic with `file:line` pointing to the unused declaration.
 - [ ] **E7 lint — unreachable step.** Create a `switch` where no case can reach a particular step. Verify lint flags it.
 - [ ] **E7 lint — missing assertion.** Create a request with no `expect` block. Verify lint warns about it.
 - [ ] **E7 lint — secret literal.** Place a string that looks like an API key (e.g., `sk-live-abc123`) directly in a tracked YAML file. Verify lint flags it as a critical error.
@@ -1280,11 +1280,11 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 #### F1. CI reporters (JUnit, TAP, GitHub Actions annotations)
 
-**What.** `httpi run` accepts `--reporter=junit|tap|github|json` with stable on-disk paths. Non-zero exit codes map cleanly to CI expectations.
+**What.** `runmark run` accepts `--reporter=junit|tap|github|json` with stable on-disk paths. Non-zero exit codes map cleanly to CI expectations.
 
 **Why.** P2, P4, P5, P7, P8. P7: "If it doesn't block a PR, it doesn't get adopted."
 
-**How.** New `packages/reporters/` (leaf utility package) with one reporter per format. CLI writes to a configurable path (`--reporter junit:./httpi/artifacts/reports/junit.xml`). GitHub reporter emits `::error file=...,line=...` annotations derived from E2 diagnostics.
+**How.** New `packages/reporters/` (leaf utility package) with one reporter per format. CLI writes to a configurable path (`--reporter junit:./runmark/artifacts/reports/junit.xml`). GitHub reporter emits `::error file=...,line=...` annotations derived from E2 diagnostics.
 
 **Principle check.** Parity preserved — MCP returns the same structured results and a reporter URI.
 
@@ -1298,13 +1298,13 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 **Why.** P4, P7.
 
-**How.** Both artifacts live under `httpi/artifacts/history/<sessionId>/`. `summary.md` uses a stable, minimal template — no frills, just facts.
+**How.** Both artifacts live under `runmark/artifacts/history/<sessionId>/`. `summary.md` uses a stable, minimal template — no frills, just facts.
 
 **Priority.** **P1**.
 
 ---
 
-#### F3. `httpi diff <sessionA> <sessionB>`
+#### F3. `runmark diff <sessionA> <sessionB>`
 
 **What.** Structured diff between two sessions: status changes, latency deltas, assertion deltas, cost deltas, body diffs as JSON Patch.
 
@@ -1319,8 +1319,8 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 #### Group F — Validation and verification
 
 > **Status (2026-04-12).** Landed this loop: **F1 JSON reporter** via
-> `httpi run --reporter json[:path]` writing the full execution result
-> (assertions + diagnostics + session state) to `httpi/artifacts/reports/run.json`
+> `runmark run --reporter json[:path]` writing the full execution result
+> (assertions + diagnostics + session state) to `runmark/artifacts/reports/run.json`
 > or a caller-specified path (`apps/cli/src/index.ts` `maybeWriteReporter`).
 > Exit codes already satisfy F1 exit-code rules: 0 on success, 1
 > (`executionFailure`) on assertion/HTTP failure, 2 (`validationFailure`)
@@ -1328,34 +1328,34 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 >
 > **Deferred to scope-extension work:** F1 JUnit XML, TAP 14, and GitHub
 > Actions `::error file=...,line=...` annotations; F2 `summary.json` /
-> `summary.md`; F3 `httpi diff <sessionA> <sessionB>`. Each is multi-turn
+> `summary.md`; F3 `runmark diff <sessionA> <sessionB>`. Each is multi-turn
 > (reporter-per-format + templates + diff walker).
 >
 > PM/QA pin at B+ on fixture coverage, matching prior groups.
 
 **Automated checks (CI / agent-executable):**
 
-- [ ] **F1 JUnit output.** Run a session with 3 passing steps and 1 failing step using `--reporter=junit:./httpi/artifacts/reports/junit.xml`. Parse the XML. Verify it is valid JUnit XML with correct `<testsuite>` counts (`tests="4"`, `failures="1"`), each `<testcase>` has `name`, `classname`, and `time` attributes, and the failure includes the assertion message.
+- [ ] **F1 JUnit output.** Run a session with 3 passing steps and 1 failing step using `--reporter=junit:./runmark/artifacts/reports/junit.xml`. Parse the XML. Verify it is valid JUnit XML with correct `<testsuite>` counts (`tests="4"`, `failures="1"`), each `<testcase>` has `name`, `classname`, and `time` attributes, and the failure includes the assertion message.
 - [ ] **F1 TAP output.** Same session with `--reporter=tap`. Verify the output conforms to TAP 14 format: plan line, `ok`/`not ok` per step, diagnostic lines for failures.
 - [ ] **F1 GitHub Actions annotations.** Run with `--reporter=github`. Verify `::error file=...,line=...::message` annotations are emitted to stdout for each failure. Verify `file` and `line` match the YAML source location from E2 diagnostics.
 - [x] **F1 JSON reporter.** Run with `--reporter=json`. Verify the output is valid JSON with the same structured assertion results as MCP returns.
 - [x] **F1 exit codes.** Verify exit code 0 when all assertions pass, exit code 1 when any assertion fails, and exit code 2 for configuration/validation errors (e.g., guard failures from D4).
 - [ ] **F1 multiple reporters.** Run with `--reporter=junit:a.xml --reporter=github`. Verify both outputs are produced.
 - [ ] **F1 MCP parity.** Run the same session via MCP. Verify the structured result includes a `reporterUri` field (or equivalent) pointing to the generated report file.
-- [ ] **F2 `summary.json`.** After a run, verify `httpi/artifacts/history/<sessionId>/summary.json` exists and contains: `passCount`, `failCount`, `totalSteps`, `totalLatencyMs`, assertion breakdown (by type), and drift state.
+- [ ] **F2 `summary.json`.** After a run, verify `runmark/artifacts/history/<sessionId>/summary.json` exists and contains: `passCount`, `failCount`, `totalSteps`, `totalLatencyMs`, assertion breakdown (by type), and drift state.
 - [ ] **F2 `summary.md`.** Verify `summary.md` exists alongside `summary.json`, is valid Markdown, and includes a concise table of step outcomes. Verify it is stable across identical runs (no timestamps or random content that would cause noisy PR diffs).
 - [ ] **F2 token/cost fields.** If H2 token accounting is also implemented, verify `summary.json` includes `totalTokens`, `totalCost`, and per-model breakdowns.
-- [ ] **F3 `httpi diff` basic.** Run the same request twice (with a fixture change between runs). Run `httpi diff <sessionA> <sessionB>`. Verify the output includes status changes, latency deltas, assertion result deltas, and body diffs as JSON Patch.
-- [ ] **F3 `--only` filter.** Run `httpi diff <A> <B> --only assertions`. Verify only assertion deltas are shown. Repeat for `--only latency`, `--only cost`, `--only body`.
-- [ ] **F3 `--json` mode.** Run `httpi diff <A> <B> --json`. Verify the output is valid JSON with the same data as the terminal table.
-- [ ] **F3 nonexistent session.** Run `httpi diff <validId> <invalidId>`. Verify a clear error, not a crash.
+- [ ] **F3 `runmark diff` basic.** Run the same request twice (with a fixture change between runs). Run `runmark diff <sessionA> <sessionB>`. Verify the output includes status changes, latency deltas, assertion result deltas, and body diffs as JSON Patch.
+- [ ] **F3 `--only` filter.** Run `runmark diff <A> <B> --only assertions`. Verify only assertion deltas are shown. Repeat for `--only latency`, `--only cost`, `--only body`.
+- [ ] **F3 `--json` mode.** Run `runmark diff <A> <B> --json`. Verify the output is valid JSON with the same data as the terminal table.
+- [ ] **F3 nonexistent session.** Run `runmark diff <validId> <invalidId>`. Verify a clear error, not a crash.
 
 **Human review checkpoints:**
 
 - [ ] Review JUnit XML generation against the de facto JUnit schema (used by Jenkins, GitHub Actions, CircleCI). Confirm `classname` uses a stable, meaningful identifier (e.g., the run file path) and `name` uses the step ID.
 - [ ] Verify GitHub annotations use the correct `::error` / `::warning` syntax and that the `file` path is relative to the repo root (not absolute), so GitHub can render them inline on PRs.
 - [ ] Confirm `summary.md` template is minimal and does not include marketing language, emojis, or verbose descriptions. It should be paste-ready for a PR comment.
-- [ ] Review `httpi diff` body diff output. Confirm JSON Patch diffs are correct (RFC 6902) and that large diffs are truncated with a clear indicator rather than dumping megabytes to the terminal.
+- [ ] Review `runmark diff` body diff output. Confirm JSON Patch diffs are correct (RFC 6902) and that large diffs are truncated with a clear indicator rather than dumping megabytes to the terminal.
 
 ---
 
@@ -1392,7 +1392,7 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 
 Supported source formats: `jsonl`, `csv`, `yaml` (array), and `http` (URL to a dataset endpoint). Artifacts live under `steps/eval-prompts/rows/<rowIndex>/`.
 
-**Principle check.** Datasets under `httpi/datasets/` are tracked. Nothing dynamic happens outside the declared vocabulary.
+**Principle check.** Datasets under `runmark/datasets/` are tracked. Nothing dynamic happens outside the declared vocabulary.
 
 **Priority.** **P0** for AI personas.
 
@@ -1407,9 +1407,9 @@ Supported source formats: `jsonl`, `csv`, `yaml` (array), and `http` (URL to a d
 **How.**
 
 ```yaml
-# httpi/config.yaml
+# runmark/config.yaml
 cassettes:
-  dir: httpi/cassettes
+  dir: runmark/cassettes
   match: [method, url, body.hash]
   redact:
     headers: [authorization, cookie]
@@ -1417,9 +1417,9 @@ cassettes:
       - $.account_number
 ```
 
-- `httpi run --record <runId>`: stores per-interaction JSON files under `httpi/cassettes/<runId>/`.
-- `httpi run --replay <runId>`: matches outbound requests against cassettes; a miss is a run failure by default.
-- Cassettes are tracked (PR-reviewable) unless the operator declares a cassette as sensitive, in which case it lives under `httpi/artifacts/cassettes/`.
+- `runmark run --record <runId>`: stores per-interaction JSON files under `runmark/cassettes/<runId>/`.
+- `runmark run --replay <runId>`: matches outbound requests against cassettes; a miss is a run failure by default.
+- Cassettes are tracked (PR-reviewable) unless the operator declares a cassette as sensitive, in which case it lives under `runmark/artifacts/cassettes/`.
 
 **Principle check.** Cassettes as tracked artifacts is a new twist but stays data-only. Redaction is declarative.
 
@@ -1429,7 +1429,7 @@ cassettes:
 
 #### G3. HAR import → request scaffold
 
-**What.** `httpi import har <file>` emits a set of request files and (optionally) a run file derived from a browser HAR.
+**What.** `runmark import har <file>` emits a set of request files and (optionally) a run file derived from a browser HAR.
 
 **Why.** P5, P6. Kills the "we used to do this in Postman" migration friction.
 
@@ -1451,9 +1451,9 @@ cassettes:
 >   parsers + per-row artifact subtrees + concurrency cap. Closest
 >   existing primitive is B6 `iterate` in `packages/execution/src/iterate-execution.ts`; a follow-up can refactor that into a shared fan-out executor.
 > - **G2 record/replay cassettes** — new `--record` / `--replay` modes,
->   cassette matcher, cassette redaction, `httpi/artifacts/cassettes/` vs
->   `httpi/cassettes/` split for sensitive recordings.
-> - **G3 HAR import** — new `httpi import har <file>` command emitting
+>   cassette matcher, cassette redaction, `runmark/artifacts/cassettes/` vs
+>   `runmark/cassettes/` split for sensitive recordings.
+> - **G3 HAR import** — new `runmark import har <file>` command emitting
 >   path-deterministic request YAMLs with secret placeholders.
 >
 > PM/QA pin at B+ on fixture coverage, matching prior groups. The
@@ -1470,9 +1470,9 @@ cassettes:
 - [ ] **G1 concurrency cap.** With `concurrency: 1` and 5 rows each taking 200 ms, verify total time ≥ 1000 ms. With `concurrency: 5`, verify ≈ 200 ms.
 - [ ] **G1 empty dataset.** Run with an empty JSONL file. Verify the step completes successfully with 0 iterations and a clear diagnostic noting the empty dataset.
 - [ ] **G1 malformed dataset.** Run with a JSONL file containing an invalid JSON line. Verify a structured diagnostic with the file path and line number of the bad record.
-- [ ] **G1 tracked dataset location.** Verify datasets referenced as `datasets/prompts.jsonl` resolve under `httpi/datasets/`, not `httpi/artifacts/`.
-- [ ] **G2 record mode.** Run `httpi run --record <runId>` against a live fixture server. Verify cassette files are written under `httpi/cassettes/<runId>/` with one JSON file per interaction. Verify each cassette contains method, URL, request headers (redacted), request body, response status, response headers (redacted), and response body (redacted per J2 rules).
-- [ ] **G2 replay mode — match.** Run `httpi run --replay <runId>`. Verify no outbound HTTP calls are made (mock server receives zero requests). Verify the responses served from cassettes produce identical assertion results as the original run.
+- [ ] **G1 tracked dataset location.** Verify datasets referenced as `datasets/prompts.jsonl` resolve under `runmark/datasets/`, not `runmark/artifacts/`.
+- [ ] **G2 record mode.** Run `runmark run --record <runId>` against a live fixture server. Verify cassette files are written under `runmark/cassettes/<runId>/` with one JSON file per interaction. Verify each cassette contains method, URL, request headers (redacted), request body, response status, response headers (redacted), and response body (redacted per J2 rules).
+- [ ] **G2 replay mode — match.** Run `runmark run --replay <runId>`. Verify no outbound HTTP calls are made (mock server receives zero requests). Verify the responses served from cassettes produce identical assertion results as the original run.
 - [ ] **G2 replay mode — miss.** Modify a request URL so it no longer matches any cassette. Run in replay mode. Verify the run fails with a diagnostic identifying the unmatched request.
 - [ ] **G2 cassette matching.** Verify the `match` strategy (`[method, url, body.hash]`) correctly distinguishes two POST requests to the same URL with different bodies.
 - [ ] **G2 cassette redaction.** Verify sensitive headers (`authorization`, `cookie`) and JSONPath patterns declared in `cassettes.redact` are replaced with placeholders in the cassette files.
@@ -1486,7 +1486,7 @@ cassettes:
 - [ ] Review G1 dataset parsing for injection safety. Confirm that row values used in `{{row.X}}` templates are treated as literal values and cannot inject YAML structure, additional template expressions, or escape the variable boundary.
 - [ ] Verify G2 cassette matching handles non-deterministic request fields (e.g., timestamps in bodies, random UUIDs in headers) gracefully. Confirm the `body.hash` strategy hashes the body AFTER applying redaction/masking, so volatile fields don't break matching.
 - [ ] Review G3 HAR import path derivation. Confirm the mapping from HAR entry URL to file path is deterministic, avoids path traversal (no `../`), and handles query parameters and fragments safely.
-- [ ] Confirm G2 sensitive cassette files (declared as sensitive by the operator) correctly land under `httpi/artifacts/cassettes/` instead of `httpi/cassettes/` and are `.gitignore`-d.
+- [ ] Confirm G2 sensitive cassette files (declared as sensitive by the operator) correctly land under `runmark/artifacts/cassettes/` instead of `runmark/cassettes/` and are `.gitignore`-d.
 
 ---
 
@@ -1496,9 +1496,9 @@ cassettes:
 
 **What.** Every run emits OTel spans for the run, each step, each attempt, and each stream chunk (optional). Export targets: local `otlp.jsonl`, OTLP/HTTP endpoint, OTLP/gRPC endpoint.
 
-**Why.** P2, P7. P7: "Lets customers dogfood our own platform on their httpi runs."
+**Why.** P2, P7. P7: "Lets customers dogfood our own platform on their runmark runs."
 
-**How.** New `packages/telemetry` module that consumes the existing event stream and emits OTel spans. Configured in `httpi/config.yaml`:
+**How.** New `packages/telemetry` module that consumes the existing event stream and emits OTel spans. Configured in `runmark/config.yaml`:
 
 ```yaml
 telemetry:
@@ -1508,7 +1508,7 @@ telemetry:
       kind: otlp-http
       endpoint: "{{$ENV:OTLP_ENDPOINT}}"
     resource:
-      service.name: httpi
+      service.name: runmark
       service.version: "0.2"
     spans:
       streamChunks: false
@@ -1537,7 +1537,7 @@ response:
     provider: anthropic
 ```
 
-Adds `usage` and `cost` fields to the step's `summary.json` and the run-level `summary.json`. Price tables live in `httpi/prices/*.yaml` (tracked, updatable).
+Adds `usage` and `cost` fields to the step's `summary.json` and the run-level `summary.json`. Price tables live in `runmark/prices/*.yaml` (tracked, updatable).
 
 **Principle check.** Declarative interpreter, closed vocabulary per provider.
 
@@ -1581,7 +1581,7 @@ Chaos only applies when the request's env resolves to a declared `chaos-safe` ma
 >   redaction mirroring artifact redaction.
 > - **H2 token/cost accounting** — `response.interpret.kind: llm-usage`
 >   declarative interpreter per provider (Anthropic/OpenAI/Bedrock/Google),
->   price tables in `httpi/prices/`, integer-minor-unit cost math,
+>   price tables in `runmark/prices/`, integer-minor-unit cost math,
 >   run-level aggregation.
 > - **H3 chaos injection** — fetch-layer delay/timeout/truncation primitives,
 >   `chaos-safe` env marker gate, no-op in guarded prod envs.
@@ -1594,12 +1594,12 @@ Chaos only applies when the request's env resolves to a declared `chaos-safe` ma
 - [ ] **H1 attempt spans.** Enable retries on a step that fails once then succeeds. Verify 2 attempt spans exist as children of the step span, with the first marked as an error.
 - [ ] **H1 stream chunk spans.** Enable `spans.streamChunks: true` on a streaming request with 5 chunks. Verify 5 chunk spans exist under the step span. Disable the flag; verify no chunk spans are emitted.
 - [ ] **H1 trace stability across pause/resume.** Pause a run mid-step, then resume. Verify the `traceId` is identical before and after resume. Verify the resumed step span has the same parent as it would have without the pause.
-- [ ] **H1 `otlp.jsonl` local export.** Configure local file export. Verify `httpi/artifacts/telemetry/otlp.jsonl` is written with one JSON object per span, parseable by standard OTel tooling.
+- [ ] **H1 `otlp.jsonl` local export.** Configure local file export. Verify `runmark/artifacts/telemetry/otlp.jsonl` is written with one JSON object per span, parseable by standard OTel tooling.
 - [ ] **H1 redaction in spans.** Verify span attributes do not contain secret values. Configure a redaction rule; verify the corresponding span attribute is redacted.
 - [ ] **H2 token accounting — Anthropic.** Configure `response.interpret.kind: llm-usage, provider: anthropic`. Send a response with a standard Anthropic `usage` block. Verify the step's `summary.json` includes `usage.input_tokens`, `usage.output_tokens`, and `cost` computed from the price table.
 - [ ] **H2 token accounting — OpenAI.** Same test with `provider: openai` and an OpenAI-shaped usage block.
 - [ ] **H2 run-level aggregation.** Run 3 steps with token accounting. Verify the run-level `summary.json` aggregates totals across all steps and breaks down by model.
-- [ ] **H2 price table.** Create a `httpi/prices/anthropic.yaml` with a known price. Verify the cost calculation matches `(input_tokens * input_price + output_tokens * output_price)` exactly.
+- [ ] **H2 price table.** Create a `runmark/prices/anthropic.yaml` with a known price. Verify the cost calculation matches `(input_tokens * input_price + output_tokens * output_price)` exactly.
 - [ ] **H2 missing price table.** Reference a model not in the price table. Verify usage is captured but cost is `null` with a warning diagnostic.
 - [ ] **H3 chaos — delay.** Configure `chaos.delayMs: 300` on a request. Verify the response takes ≥ 300 ms longer than the unchaosd baseline.
 - [ ] **H3 chaos — failure rate.** Configure `chaos.failureRate: 1.0, failureClass: timeout`. Verify the request times out. Configure `failureRate: 0.0`; verify it succeeds.
@@ -1612,7 +1612,7 @@ Chaos only applies when the request's env resolves to a declared `chaos-safe` ma
 - [ ] Review H1 `traceId` derivation. Confirm it is deterministically derived from `sessionId` + attempt counter so that traces are reproducible and correlate correctly across pause/resume boundaries.
 - [ ] Verify H1 OTel span attribute naming follows OTel semantic conventions (e.g., `http.method`, `http.status_code`, `http.url`) where applicable.
 - [ ] Review H2 provider response parsing. Confirm it handles missing `usage` fields gracefully (some LLM responses omit usage on streaming). Confirm it does NOT crash on unexpected response shapes — it should produce a warning diagnostic and proceed.
-- [ ] Verify H2 price tables are tracked under `httpi/prices/` and are simple, auditable YAML with per-model per-token-type prices. Confirm no floating-point arithmetic issues in cost calculation (use integer minor-unit math or decimal libraries).
+- [ ] Verify H2 price tables are tracked under `runmark/prices/` and are simple, auditable YAML with per-model per-token-type prices. Confirm no floating-point arithmetic issues in cost calculation (use integer minor-unit math or decimal libraries).
 - [ ] Review H3 chaos injection integration point. Confirm chaos is injected at the HTTP transport layer (wrapping `fetch`), not at the response parsing layer, so it accurately simulates real network conditions.
 
 ---
@@ -1643,7 +1643,7 @@ expect:
         gte: 1
 ```
 
-Tracked `.gql` files live under `httpi/graphql/`.
+Tracked `.gql` files live under `runmark/graphql/`.
 
 **Principle check.** Pure data, path-derived references.
 
@@ -1752,10 +1752,10 @@ The engine parses values as bigints of minor units based on `currency` and compa
 - [ ] **I1 GraphQL request.** Create a `kind: request` with a `graphql` block referencing a `.gql` file and variables. Verify the outbound request is `POST` with `Content-Type: application/json` and a body containing `{ "query": "...", "variables": { ... } }`. Verify the query text matches the `.gql` file content exactly.
 - [ ] **I1 GraphQL extraction.** Configure a JSONPath assertion on `$.data.organization.repositories.totalCount`. Verify extraction works with the `data.*` convention — no need to manually account for the GraphQL wrapper.
 - [ ] **I1 GraphQL error handling.** Send a response with `{ "errors": [...], "data": null }`. Verify the assertion fails with a diagnostic that includes the GraphQL error message, not just "null at path".
-- [ ] **I1 tracked `.gql` files.** Verify `.gql` files resolve under `httpi/graphql/` and are treated as tracked definitions.
-- [ ] **I2 cursor pagination.** Configure `paginate.kind: cursor` against a fixture that returns 3 pages with a `next_cursor` field. Verify httpi follows all 3 pages, the extracted `items` array is flattened to contain all items from all pages, and exactly 3 HTTP requests are made.
+- [ ] **I1 tracked `.gql` files.** Verify `.gql` files resolve under `runmark/graphql/` and are treated as tracked definitions.
+- [ ] **I2 cursor pagination.** Configure `paginate.kind: cursor` against a fixture that returns 3 pages with a `next_cursor` field. Verify runmark follows all 3 pages, the extracted `items` array is flattened to contain all items from all pages, and exactly 3 HTTP requests are made.
 - [ ] **I2 `maxPages` enforcement.** Set `maxPages: 2` on a 5-page fixture. Verify only 2 pages are fetched and the extracted array contains items from pages 1–2 only.
-- [ ] **I2 Link header pagination.** Configure `paginate.kind: link-header`. Verify httpi follows `Link: <url>; rel="next"` headers correctly.
+- [ ] **I2 Link header pagination.** Configure `paginate.kind: link-header`. Verify runmark follows `Link: <url>; rel="next"` headers correctly.
 - [ ] **I2 offset pagination.** Configure `paginate.kind: offset` with a known total. Verify correct offset/limit parameter progression.
 - [ ] **I2 empty page termination.** Verify pagination stops when a page returns an empty array or a null cursor, without requiring `maxPages`.
 - [ ] **I3 decimal-safe money — exact match.** Assert `$.amount money: { value: "10.99", currency: usd, mode: strict }` against a response containing `10.99`. Verify pass. Assert against `10.990000001` (float precision artifact); verify it still passes (parsed as minor units: 1099 == 1099).
@@ -1783,7 +1783,7 @@ The engine parses values as bigints of minor units based on `currency` and compa
 
 #### J1. Audit log export with signed manifest
 
-**What.** `httpi export audit <sessionId>` emits a signed JSONL bundle of all requests, responses (redacted), assertions, attempts, and outcomes, suitable for SOC 2 / PCI evidence.
+**What.** `runmark export audit <sessionId>` emits a signed JSONL bundle of all requests, responses (redacted), assertions, attempts, and outcomes, suitable for SOC 2 / PCI evidence.
 
 **Why.** P5, P8.
 
@@ -1804,7 +1804,7 @@ The engine parses values as bigints of minor units based on `currency` and compa
 **How.**
 
 ```yaml
-# httpi/config.yaml
+# runmark/config.yaml
 capture:
   redactHeaders: [authorization, cookie, set-cookie]
   redactJsonPaths:
@@ -1827,7 +1827,7 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 
 #### J3. Pre-commit hook: block secret literals in tracked files
 
-**What.** A lightweight hook (`httpi check secrets`) that scans tracked definitions for likely secret literals and exits non-zero.
+**What.** A lightweight hook (`runmark check secrets`) that scans tracked definitions for likely secret literals and exits non-zero.
 
 **Why.** P5, P6, P8.
 
@@ -1846,32 +1846,32 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 > named PII detectors (email / us-ssn), regex redaction, audit export,
 > and pre-commit hook are deferred scope-extension work.
 >
-> - **J1 audit export + signed manifest** — new `httpi export audit` +
+> - **J1 audit export + signed manifest** — new `runmark export audit` +
 >   SHA-256 manifest + local-key signer, plus verification command.
 > - **J2 `redactJsonPaths` + `redactPatterns`** — declared rules fed
 >   through a unified capture-time redaction pipeline that covers
 >   artifacts, cassettes (G2), reporters (F1), and OTel spans (H1).
-> - **J3 `httpi check secrets`** — pre-commit hook scanning tracked
+> - **J3 `runmark check secrets`** — pre-commit hook scanning tracked
 >   files with the same pattern vocabulary as J2.
 >
 > PM/QA pin at B+ on fixture coverage.
 
 **Automated checks (CI / agent-executable):**
 
-- [ ] **J1 audit export.** Run a session with 3 steps. Export with `httpi export audit <sessionId>`. Verify the output is a valid JSONL file containing one record per request, response, assertion, and attempt — all with redacted values. Verify the file includes a manifest hash line.
+- [ ] **J1 audit export.** Run a session with 3 steps. Export with `runmark export audit <sessionId>`. Verify the output is a valid JSONL file containing one record per request, response, assertion, and attempt — all with redacted values. Verify the file includes a manifest hash line.
 - [ ] **J1 manifest signature.** Verify `audit.manifest.sig` is produced alongside the JSONL export. Verify the signature validates against the manifest hash using the configured key.
-- [ ] **J1 reproducibility.** Run `httpi export audit <sessionId>` twice. Verify the JSONL content and manifest hash are byte-identical (deterministic).
+- [ ] **J1 reproducibility.** Run `runmark export audit <sessionId>` twice. Verify the JSONL content and manifest hash are byte-identical (deterministic).
 - [ ] **J1 redaction in export.** Configure redaction rules (J2). Verify the audit export applies all redaction rules — search the JSONL for known secret values and assert zero matches.
 - [x] **J2 header redaction.** Configure `redactHeaders: [authorization, cookie]`. Run a request with both headers. Verify artifacts, CLI output, and MCP responses all show `[REDACTED]` for those header values. Verify the original values are NOT stored anywhere on disk.
 - [ ] **J2 JSONPath redaction.** Configure `redactJsonPaths: [$.user.email]`. Run a request that returns a body with `user.email`. Verify the email is replaced with `[REDACTED]` in the response artifact. Verify it is also redacted in snapshot files (B3), cassette files (G2), CI reporter output (F1), and OTel span attributes (H1).
 - [ ] **J2 pattern redaction — named.** Configure `redactPatterns: [{ kind: email }]`. Verify email addresses in response bodies are redacted even without explicit JSONPath targeting.
 - [ ] **J2 pattern redaction — regex.** Configure `redactPatterns: [{ kind: regex, pattern: "sk-live-[A-Za-z0-9]+" }]`. Verify matching strings are redacted in all outputs.
-- [ ] **J2 capture-time enforcement.** Verify redaction occurs BEFORE writing to disk. Inspect the raw artifact file bytes (not through the httpi read path) and confirm the redacted value is never present in the file.
-- [ ] **J2 uniform application.** For a single redaction rule, verify it applies identically across: CLI terminal output, MCP response JSON, session artifacts (`httpi/artifacts/history/`), cassette files (G2), CI reporter output (F1 JUnit/TAP/GitHub), OTel spans (H1), and audit exports (J1). All must show the same redaction placeholder.
-- [ ] **J3 pre-commit hook — secret detected.** Place `sk-live-abc123def456` in a tracked YAML file. Run `httpi check secrets`. Verify exit code 1 and a diagnostic naming the file, line, and matched pattern.
-- [ ] **J3 pre-commit hook — clean.** Run `httpi check secrets` on a project with no secret literals. Verify exit code 0.
-- [ ] **J3 pattern alignment.** Verify `httpi check secrets` uses the same pattern vocabulary as J2 `redactPatterns`. A pattern configured in J2 must also be detected by J3.
-- [ ] **J3 Husky integration.** Verify the shipped hook recipe in `scripts/hooks/` is a valid Husky pre-commit hook that calls `httpi check secrets` and fails the commit on non-zero exit.
+- [ ] **J2 capture-time enforcement.** Verify redaction occurs BEFORE writing to disk. Inspect the raw artifact file bytes (not through the runmark read path) and confirm the redacted value is never present in the file.
+- [ ] **J2 uniform application.** For a single redaction rule, verify it applies identically across: CLI terminal output, MCP response JSON, session artifacts (`runmark/artifacts/history/`), cassette files (G2), CI reporter output (F1 JUnit/TAP/GitHub), OTel spans (H1), and audit exports (J1). All must show the same redaction placeholder.
+- [ ] **J3 pre-commit hook — secret detected.** Place `sk-live-abc123def456` in a tracked YAML file. Run `runmark check secrets`. Verify exit code 1 and a diagnostic naming the file, line, and matched pattern.
+- [ ] **J3 pre-commit hook — clean.** Run `runmark check secrets` on a project with no secret literals. Verify exit code 0.
+- [ ] **J3 pattern alignment.** Verify `runmark check secrets` uses the same pattern vocabulary as J2 `redactPatterns`. A pattern configured in J2 must also be detected by J3.
+- [ ] **J3 Husky integration.** Verify the shipped hook recipe in `scripts/hooks/` is a valid Husky pre-commit hook that calls `runmark check secrets` and fails the commit on non-zero exit.
 
 **Human review checkpoints:**
 
@@ -1879,8 +1879,8 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 - [ ] Verify J1 audit export cannot be weaponized as an information leak. Confirm the export applies the SAME redaction rules as capture-time redaction — it must not be possible to export unredacted data through the audit path.
 - [ ] Review J2 capture-time redaction implementation. Confirm it operates as a write-time filter on the artifact writer, not a read-time filter on artifact display. This is the single most important security property in the redaction system. Trace the code path from `fetch` response to disk write and confirm the redaction transform is in the pipeline.
 - [ ] Verify J2 regex patterns are compiled once at load time and applied efficiently. Confirm there are no ReDoS-vulnerable patterns in the built-in named detectors (email, SSN, credit card). Test with adversarial inputs (e.g., long strings of digits) and confirm O(n) behavior.
-- [ ] Review J3 for false negatives. Confirm it scans ALL tracked files under `httpi/` (not just `*.yaml`), including block files, dataset files, GraphQL queries, and schema files.
-- [ ] Verify the audit signing mechanism is documented and the verification command (`httpi verify audit <export>`) exists or is planned. An audit trail that can't be verified is theater.
+- [ ] Review J3 for false negatives. Confirm it scans ALL tracked files under `runmark/` (not just `*.yaml`), including block files, dataset files, GraphQL queries, and schema files.
+- [ ] Verify the audit signing mechanism is documented and the verification command (`runmark verify audit <export>`) exists or is planned. An audit trail that can't be verified is theater.
 
 ---
 
@@ -1916,11 +1916,11 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 - D2 — Auto token refresh
 - D3 — Vault / 1Password / AWS SM resolvers
 - D5 — Webhook signature verifier vocabulary
-- E4 — Scaffolding (`httpi new ...`)
+- E4 — Scaffolding (`runmark new ...`)
 - E5 — Single-step replay
 - E6 — Variable provenance in diagnostics
 - F2 — `summary.json` + `summary.md`
-- F3 — `httpi diff <sessionA> <sessionB>`
+- F3 — `runmark diff <sessionA> <sessionB>`
 - G2 — Record / replay cassettes
 - H1 — OTel trace export
 - H2 — Token / cost accounting
@@ -1935,7 +1935,7 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 - B6 — Latency percentile assertions
 - C6 — Compensation blocks
 - D1 — Device-code, on-behalf-of auth grants
-- E7 — `httpi lint`
+- E7 — `runmark lint`
 - G3 — HAR import
 - H3 — Chaos injection
 - I3 — Decimal-safe money type
@@ -1957,7 +1957,7 @@ Applied at capture time, not display time. Same rules feed CLI output, MCP outpu
 Every P0–P3 item above was checked against these invariants. Any future proposal that breaks one of them must be rejected outright.
 
 1. **Pure-data YAML.** No embedded scripting, no `eval`, no Lua/JS hooks, no user-supplied predicates. Every new feature expands a closed vocabulary that ships with the engine.
-2. **Tracked intent, untracked runtime.** `httpi/` is the source of truth; `httpi/artifacts/` holds evidence. A new improvement may add tracked files (snapshots, cassettes, rubrics, datasets, GraphQL queries, schemas) or runtime files (auth caches, judge caches, downloads, telemetry exports), never both in the same place.
+2. **Tracked intent, untracked runtime.** `runmark/` is the source of truth; `runmark/artifacts/` holds evidence. A new improvement may add tracked files (snapshots, cassettes, rubrics, datasets, GraphQL queries, schemas) or runtime files (auth caches, judge caches, downloads, telemetry exports), never both in the same place.
 3. **Path-derived identity.** File-path is the canonical ID. Titles are cosmetic.
 4. **CLI ↔ MCP parity.** Every new command surfaces identically in both adapters with the same diagnostics, same redaction, same artifact semantics.
 5. **Explicit, operator-driven recovery.** No auto-retries beyond declared policy; no automatic rollback; no silent resume.
@@ -1989,4 +1989,4 @@ These remained out-of-scope across every persona signal worth acting on:
 3. Use §7 as the acceptance gate for any PR that claims to implement one of these improvements. If the PR breaks an invariant, reject it regardless of feature value.
 4. Revisit the gap analysis in §4 quarterly. Mark rows as closed, and drop any row whose persona signal has shifted.
 
-The shape of httpi does not need to change to absorb most of this proposal. What needs to change is the amount of declarative vocabulary the engine understands. Every improvement above is additive within the existing architectural boundaries — streaming response modes in `packages/http`, new step kinds and expression vocabulary in `packages/execution`, new resolver kinds in `packages/runtime`, new reporters as leaf packages. The invariants hold.
+The shape of runmark does not need to change to absorb most of this proposal. What needs to change is the amount of declarative vocabulary the engine understands. Every improvement above is additive within the existing architectural boundaries — streaming response modes in `packages/http`, new step kinds and expression vocabulary in `packages/execution`, new resolver kinds in `packages/runtime`, new reporters as leaf packages. The invariants hold.

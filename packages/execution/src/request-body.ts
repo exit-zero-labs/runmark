@@ -7,16 +7,16 @@ import type {
   CompiledRequestStep,
   JsonValue,
   ResolvedRequestBody,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
 import {
   assertPathWithin,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   resolveFromRoot,
   trackedDirectoryName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { uniqueSecretValues } from "./request-secrets.js";
 import {
   resolveStringValue,
@@ -107,19 +107,19 @@ export async function resolveRequestBody(
   try {
     assertPathWithin(bodiesDirectory, bodyFilePath, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyResolutionError(
         "BODY_FILE_PATH_INVALID",
         error.message,
         diagnosticLocation,
-        "Update body.file so it points to a file inside httpi/bodies.",
+        "Update body.file so it points to a file inside runmark/bodies.",
       );
     }
 
@@ -130,7 +130,7 @@ export async function resolveRequestBody(
       "BODY_FILE_NOT_FOUND",
       `Body file ${bodyDefinition.file} was not found.`,
       diagnosticLocation,
-      "Create the referenced body file or update body.file to an existing file inside httpi/bodies.",
+      "Create the referenced body file or update body.file to an existing file inside runmark/bodies.",
     );
   }
 
@@ -140,7 +140,7 @@ export async function resolveRequestBody(
       "BODY_FILE_PATH_INVALID",
       `Body file ${bodyDefinition.file} must not resolve through a symlink.`,
       diagnosticLocation,
-      "Replace the symlink with a real tracked body file inside httpi/bodies.",
+      "Replace the symlink with a real tracked body file inside runmark/bodies.",
     );
   }
 
@@ -149,19 +149,19 @@ export async function resolveRequestBody(
   try {
     assertPathWithin(resolvedBodiesDirectory, resolvedBodyFilePath, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyResolutionError(
         "BODY_FILE_PATH_INVALID",
         error.message,
         diagnosticLocation,
-        "Update body.file so it points to a file inside httpi/bodies.",
+        "Update body.file so it points to a file inside runmark/bodies.",
       );
     }
 
@@ -207,7 +207,7 @@ async function assertProjectOwnedDirectory(
       "BODY_FILE_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       diagnosticLocation,
-      "Replace the symlinked httpi/bodies directory with a real tracked directory.",
+      "Replace the symlinked runmark/bodies directory with a real tracked directory.",
     );
   }
   if (!directoryStats.isDirectory()) {
@@ -215,7 +215,7 @@ async function assertProjectOwnedDirectory(
       "BODY_FILE_PATH_INVALID",
       `${message} must be a directory.`,
       diagnosticLocation,
-      "Restore httpi/bodies as a directory before referencing body files from requests.",
+      "Restore runmark/bodies as a directory before referencing body files from requests.",
     );
   }
 
@@ -229,14 +229,14 @@ async function assertProjectOwnedDirectory(
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyResolutionError(
         "BODY_FILE_PATH_INVALID",
         error.message,
         diagnosticLocation,
-        "Restore httpi/bodies inside the project root before referencing body files from requests.",
+        "Restore runmark/bodies inside the project root before referencing body files from requests.",
       );
     }
 
@@ -351,7 +351,7 @@ async function resolveMultipartBody(
   bodyDefinition: BodyMultipartDefinition,
   context: RequestResolutionContext,
 ): Promise<RequestBodyResolution> {
-  const boundary = `----httpi-${randomBytes(16).toString("hex")}`;
+  const boundary = `----runmark-${randomBytes(16).toString("hex")}`;
   const allSecrets: string[] = [];
   const bufferParts: Buffer[] = [];
 
@@ -377,19 +377,19 @@ async function resolveMultipartBody(
       try {
         assertPathWithin(bodiesDirectory, filePath, {
           code: "BODY_FILE_PATH_INVALID",
-          message: `Multipart part file ${part.file} must stay within httpi/bodies.`,
+          message: `Multipart part file ${part.file} must stay within runmark/bodies.`,
           exitCode: exitCodes.validationFailure,
         });
       } catch (error) {
         if (
-          error instanceof HttpiError &&
+          error instanceof RunmarkError &&
           error.code === "BODY_FILE_PATH_INVALID"
         ) {
           throw buildBodyResolutionError(
             "BODY_FILE_PATH_INVALID",
-            (error as HttpiError).message,
+            (error as RunmarkError).message,
             diagnosticLocation,
-            "Update the multipart part file path to stay within httpi/bodies.",
+            "Update the multipart part file path to stay within runmark/bodies.",
           );
         }
         throw error;
@@ -400,7 +400,7 @@ async function resolveMultipartBody(
           "BODY_FILE_NOT_FOUND",
           `Multipart part file ${part.file} was not found.`,
           diagnosticLocation,
-          "Create the referenced file inside httpi/bodies.",
+          "Create the referenced file inside runmark/bodies.",
         );
       }
 
@@ -410,7 +410,7 @@ async function resolveMultipartBody(
           "BODY_FILE_PATH_INVALID",
           `Multipart part file ${part.file} must not be a symlink.`,
           diagnosticLocation,
-          "Replace the symlink with a real file inside httpi/bodies.",
+          "Replace the symlink with a real file inside runmark/bodies.",
         );
       }
 
@@ -419,19 +419,19 @@ async function resolveMultipartBody(
       try {
         assertPathWithin(resolvedBodies, resolvedFile, {
           code: "BODY_FILE_PATH_INVALID",
-          message: `Multipart part file ${part.file} must stay within httpi/bodies.`,
+          message: `Multipart part file ${part.file} must stay within runmark/bodies.`,
           exitCode: exitCodes.validationFailure,
         });
       } catch (error) {
         if (
-          error instanceof HttpiError &&
+          error instanceof RunmarkError &&
           error.code === "BODY_FILE_PATH_INVALID"
         ) {
           throw buildBodyResolutionError(
             "BODY_FILE_PATH_INVALID",
-            (error as HttpiError).message,
+            (error as RunmarkError).message,
             diagnosticLocation,
-            "Update the multipart part file path to stay within httpi/bodies.",
+            "Update the multipart part file path to stay within runmark/bodies.",
           );
         }
         throw error;
@@ -510,19 +510,19 @@ async function resolveBinaryBody(
   try {
     assertPathWithin(bodiesDirectory, bodyFilePath, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyResolutionError(
         "BODY_FILE_PATH_INVALID",
         error.message,
         diagnosticLocation,
-        "Update body.file so it points to a file inside httpi/bodies.",
+        "Update body.file so it points to a file inside runmark/bodies.",
       );
     }
     throw error;
@@ -533,7 +533,7 @@ async function resolveBinaryBody(
       "BODY_FILE_NOT_FOUND",
       `Body file ${bodyDefinition.file} was not found.`,
       diagnosticLocation,
-      "Create the referenced body file or update body.file to an existing file inside httpi/bodies.",
+      "Create the referenced body file or update body.file to an existing file inside runmark/bodies.",
     );
   }
 
@@ -544,7 +544,7 @@ async function resolveBinaryBody(
       "BODY_FILE_PATH_INVALID",
       `Body file ${bodyDefinition.file} must not resolve through a symlink.`,
       diagnosticLocation,
-      "Replace the symlink with a real tracked body file inside httpi/bodies.",
+      "Replace the symlink with a real tracked body file inside runmark/bodies.",
     );
   }
 
@@ -553,19 +553,19 @@ async function resolveBinaryBody(
   try {
     assertPathWithin(resolvedBodiesDir, resolvedBodyFile, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyResolutionError(
         "BODY_FILE_PATH_INVALID",
         error.message,
         diagnosticLocation,
-        "Update body.file so it points to a file inside httpi/bodies.",
+        "Update body.file so it points to a file inside runmark/bodies.",
       );
     }
     throw error;
@@ -586,8 +586,8 @@ function buildBodyResolutionError(
   message: string,
   diagnosticLocation: BodyDiagnosticLocation,
   hint: string,
-): HttpiError {
-  return new HttpiError(code, message, {
+): RunmarkError {
+  return new RunmarkError(code, message, {
     exitCode: exitCodes.validationFailure,
     details: [
       {

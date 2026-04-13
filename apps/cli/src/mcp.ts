@@ -1,10 +1,10 @@
 /**
- * MCP adapter for the shared `httpi` engine.
+ * MCP adapter for the shared `runmark` engine.
  *
  * Like the CLI entrypoint, this module should stay adapter-thin: validate tool
  * inputs, call execution-package APIs, and normalize responses for MCP clients.
  */
-import { isDiagnostic } from "@exit-zero-labs/httpi-contracts";
+import { isDiagnostic } from "@exit-zero-labs/runmark-contracts";
 import {
   cancelSessionRun,
   describeRequest,
@@ -19,13 +19,13 @@ import {
   runRequest,
   runRun,
   validateProject,
-} from "@exit-zero-labs/httpi-execution";
+} from "@exit-zero-labs/runmark-execution";
 import {
   asRecord,
   coerceErrorMessage,
   exitCodes,
-  HttpiError,
-} from "@exit-zero-labs/httpi-shared";
+  RunmarkError,
+} from "@exit-zero-labs/runmark-shared";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -41,7 +41,7 @@ const flatValueSchema = z.union([
 const overridesSchema = z.record(z.string(), flatValueSchema);
 const projectRootSchema = z
   .string()
-  .describe("Path to the project root containing httpi/config.yaml.");
+  .describe("Path to the project root containing runmark/config.yaml.");
 
 // MCP servers are often launched outside the target repository, so every tool
 // call must identify the project explicitly instead of relying on server cwd.
@@ -204,10 +204,10 @@ const explainVariablesOutputSchema = {
   message: z.string().optional(),
 };
 
-/** Create the stdio MCP server and register the public `httpi` tool surface. */
+/** Create the stdio MCP server and register the public `runmark` tool surface. */
 export function createMcpServer(): McpServer {
   const server = new McpServer({
-    name: "httpi",
+    name: "runmark",
     version: packageJson.version,
   });
 
@@ -215,7 +215,7 @@ export function createMcpServer(): McpServer {
     "list_definitions",
     {
       description:
-        "Discover requests, runs, envs, and sessions in an httpi project.",
+        "Discover requests, runs, envs, and sessions in an runmark project.",
       inputSchema: {
         ...engineOptionsSchema,
       },
@@ -228,7 +228,7 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "validate_project",
     {
-      description: "Validate tracked httpi definitions and references.",
+      description: "Validate tracked runmark definitions and references.",
       inputSchema: {
         ...engineOptionsSchema,
       },
@@ -282,7 +282,7 @@ export function createMcpServer(): McpServer {
     "run_definition",
     {
       description:
-        "Execute a request or run definition using the shared httpi engine. Provide exactly one of requestId or runId.",
+        "Execute a request or run definition using the shared runmark engine. Provide exactly one of requestId or runId.",
       inputSchema: {
         requestId: z.string().optional(),
         runId: z.string().optional(),
@@ -293,7 +293,7 @@ export function createMcpServer(): McpServer {
     async ({ requestId, runId, projectRoot, envId, overrides }) =>
       handleTool(async () => {
         if (requestId && runId) {
-          throw new HttpiError(
+          throw new RunmarkError(
             "RUN_TARGET_AMBIGUOUS",
             "Provide either requestId or runId, not both.",
             { exitCode: exitCodes.validationFailure },
@@ -316,7 +316,7 @@ export function createMcpServer(): McpServer {
           });
         }
 
-        throw new HttpiError(
+        throw new RunmarkError(
           "RUN_TARGET_REQUIRED",
           "Provide requestId or runId.",
           {
@@ -485,7 +485,7 @@ export function createMcpServer(): McpServer {
   return server;
 }
 
-/** Start the stdio MCP server used by `httpi mcp`. */
+/** Start the stdio MCP server used by `runmark mcp`. */
 export async function startMcpServer(): Promise<void> {
   const server = createMcpServer();
   const transport = new StdioServerTransport();
@@ -549,7 +549,7 @@ async function handleTool(action: () => Promise<unknown>): Promise<{
   try {
     return toolResult(await action());
   } catch (error) {
-    if (error instanceof HttpiError) {
+    if (error instanceof RunmarkError) {
       return toolError(error.message, error.code, error.details);
     }
 

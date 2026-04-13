@@ -1,4 +1,4 @@
-import type { SessionStepRecord } from "@exit-zero-labs/httpi-contracts";
+import type { SessionStepRecord } from "@exit-zero-labs/runmark-contracts";
 import type { ExtractedStepOutputs } from "./types.js";
 
 function formatSecretValue(value: unknown): string | undefined {

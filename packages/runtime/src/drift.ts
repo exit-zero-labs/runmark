@@ -2,15 +2,15 @@ import { lstat, readFile, realpath } from "node:fs/promises";
 import type {
   Diagnostic,
   SessionRecord,
-} from "@exit-zero-labs/httpi-contracts";
-import { toDisplayDiagnosticFile } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { toDisplayDiagnosticFile } from "@exit-zero-labs/runmark-contracts";
 import {
   assertPathWithin,
   exitCodes,
-  HttpiError,
+  RunmarkError,
   hashProcessEnvValue,
   sha256Hex,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import {
   isMap,
   isScalar,
@@ -84,7 +84,7 @@ export async function detectDefinitionDrift(
       });
     } catch (error) {
       if (
-        error instanceof HttpiError &&
+        error instanceof RunmarkError &&
         error.code === "DEFINITION_PATH_INVALID"
       ) {
         diagnostics.push({

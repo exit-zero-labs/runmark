@@ -6,15 +6,15 @@ import type {
   HttpMethod,
   JsonValue,
   LoadedDefinition,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   appendDiagnosticPath,
   schemaVersion,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   asRecord,
   looksLikeSecretFieldName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 
 export type DefinitionParser<TValue> = (
   value: unknown,

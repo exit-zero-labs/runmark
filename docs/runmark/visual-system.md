@@ -2,8 +2,8 @@
 
 # Runmark visual system
 
-**Status**: Internal draft  
-**Current implementation name**: `httpi`  
+**Status**: Active reference  
+**Previous name**: `httpi`  
 **Companion docs**: [brand foundation](brand-foundation.md), [voice and messaging](voice-and-messaging.md), [applications](applications.md)
 
 ---

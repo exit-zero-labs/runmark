@@ -1,8 +1,8 @@
 <!-- @format -->
 
-# Get started developing httpi
+# Get started developing Runmark
 
-This guide is for contributors and maintainers working inside the `httpi` monorepo. If you want to use the tool, start with [`README.md`](../README.md).
+This guide is for contributors and maintainers working inside the `runmark` monorepo. If you want to use the tool, start with [`README.md`](../README.md).
 
 ## Prerequisites
 
@@ -51,11 +51,11 @@ node apps/cli/dist/index.js explain variables --run smoke --step login --project
 
 | Path | Purpose |
 | --- | --- |
-| `apps/cli` | thin CLI + MCP adapter published as `@exit-zero-labs/httpi` (bin: `httpi`; `httpi mcp` starts the stdio server) |
-| `apps/docsweb` | Starlight docs site intended for `httpi.exitzerolabs.com` |
+| `apps/cli` | thin CLI + MCP adapter published as `@exit-zero-labs/runmark` (bin: `runmark`; `runmark mcp` starts the stdio server) |
+| `apps/docsweb` | Starlight docs site intended for `runmark.exitzerolabs.com` |
 | `packages/` | shared contracts, definition loading, execution, runtime, HTTP, and utilities |
 | `examples/` | public example projects that double as canonical test inputs |
-| `testing/httpi/` | unit, example, E2E, publish, flow, and judge-oriented validation assets |
+| `testing/runmark/` | unit, example, E2E, publish, flow, and judge-oriented validation assets |
 | `docs/` | product, architecture, roadmap, and operator guidance |
 
 ## Working with examples
@@ -71,7 +71,7 @@ The public examples are part of the product surface, not throwaway fixtures.
 
 Only the unified CLI package publishes to npm:
 
-- `@exit-zero-labs/httpi` (bin: `httpi`; exposes both the CLI surface and the `httpi mcp` stdio MCP server)
+- `@exit-zero-labs/runmark` (bin: `runmark`; exposes both the CLI surface and the `runmark mcp` stdio MCP server)
 
 When a change affects published behavior, packaging, or install-time documentation:
 
@@ -84,5 +84,5 @@ When a change affects published behavior, packaging, or install-time documentati
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) for contribution workflow and release guidance
 - [`docs/architecture.md`](architecture.md) for package boundaries and runtime semantics
 - [`docs/agent-guide.md`](agent-guide.md) for CLI/MCP execution guidance
-- [`testing/httpi/README.md`](../testing/httpi/README.md) for automated test assets and judge checklists
+- [`testing/runmark/README.md`](../testing/runmark/README.md) for automated test assets and judge checklists
 - [`docs/roadmap.md`](roadmap.md) for planned work and scope guardrails

@@ -1,8 +1,8 @@
 <!-- @format -->
 
-# Support httpi
+# Support Runmark
 
-`httpi` is intended to be sustained by donations.
+`runmark` is intended to be sustained by donations.
 
 ## Current donation paths
 

@@ -1,22 +1,22 @@
 {
   "yaml.schemas": {
     "./packages/contracts/schemas/config.schema.json": [
-      "examples/**/httpi/config.yaml"
+      "examples/**/runmark/config.yaml"
     ],
     "./packages/contracts/schemas/env.schema.json": [
-      "examples/**/httpi/env/**/*.env.yaml"
+      "examples/**/runmark/env/**/*.env.yaml"
     ],
     "./packages/contracts/schemas/request.schema.json": [
-      "examples/**/httpi/requests/**/*.request.yaml"
+      "examples/**/runmark/requests/**/*.request.yaml"
     ],
     "./packages/contracts/schemas/run.schema.json": [
-      "examples/**/httpi/runs/**/*.run.yaml"
+      "examples/**/runmark/runs/**/*.run.yaml"
     ],
     "./packages/contracts/schemas/header-block.schema.json": [
-      "examples/**/httpi/blocks/headers/**/*.yaml"
+      "examples/**/runmark/blocks/headers/**/*.yaml"
     ],
     "./packages/contracts/schemas/auth-block.schema.json": [
-      "examples/**/httpi/blocks/auth/**/*.yaml"
+      "examples/**/runmark/blocks/auth/**/*.yaml"
     ]
   }
 }

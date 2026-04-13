@@ -4,7 +4,7 @@
 
 ## Supported versions
 
-`httpi` is pre-1.0. The latest code on the default branch is the only supported version for security reporting and fixes.
+`runmark` is pre-1.0. The latest code on the default branch is the only supported version for security reporting and fixes.
 
 ## Reporting a vulnerability
 
@@ -24,9 +24,9 @@ When reporting an issue, include:
 
 ## Security notes for operators
 
-- `httpi` keeps tracked intent in `httpi/` and runtime-only state in `httpi/artifacts/`; `httpi/artifacts/` should stay Git-ignored apart from tracked `.gitkeep` placeholders.
-- Runtime secrets belong in `httpi/artifacts/secrets.yaml` or supported `$ENV:NAME` references. Missing `$ENV:NAME` errors intentionally reveal the variable name, but never the secret value itself.
-- Session lock files live under `httpi/artifacts/sessions/`. If a process crashes and leaves a stale `<sessionId>.lock` behind, remove that lock file only after you confirm no other `httpi` process is still operating on the same session.
+- `runmark` keeps tracked intent in `runmark/` and runtime-only state in `runmark/artifacts/`; `runmark/artifacts/` should stay Git-ignored apart from tracked `.gitkeep` placeholders.
+- Runtime secrets belong in `runmark/artifacts/secrets.yaml` or supported `$ENV:NAME` references. Missing `$ENV:NAME` errors intentionally reveal the variable name, but never the secret value itself.
+- Session lock files live under `runmark/artifacts/sessions/`. If a process crashes and leaves a stale `<sessionId>.lock` behind, remove that lock file only after you confirm no other `runmark` process is still operating on the same session.
 
 ## What to expect
 

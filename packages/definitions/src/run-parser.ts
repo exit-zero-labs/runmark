@@ -8,9 +8,9 @@ import type {
   RunPollUntilStepDefinition,
   RunRequestStepDefinition,
   RunStepDefinition,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
-import { asRecord } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
+import { asRecord } from "@exit-zero-labs/runmark-shared";
 import {
   expectRecord,
   isJsonValue,
@@ -249,7 +249,7 @@ function parseOptionalIterate(
   filePath: string,
   diagnostics: Diagnostic[],
   path: string,
-): import("@exit-zero-labs/httpi-contracts").IterateConfig | undefined {
+): import("@exit-zero-labs/runmark-contracts").IterateConfig | undefined {
   if (value === undefined) return undefined;
   const record = asRecord(value);
   if (!record) {
@@ -413,7 +413,7 @@ function parseRunSwitchStep(
   diagnostics: Diagnostic[],
   path: string,
 ):
-  | import("@exit-zero-labs/httpi-contracts").RunSwitchStepDefinition
+  | import("@exit-zero-labs/runmark-contracts").RunSwitchStepDefinition
   | undefined {
   const id = readRequiredString(
     record,
@@ -489,7 +489,7 @@ function parseRunSwitchStep(
       : [];
     return [
       {
-        when: rec.when as import("@exit-zero-labs/httpi-contracts").JsonValue,
+        when: rec.when as import("@exit-zero-labs/runmark-contracts").JsonValue,
         steps: innerSteps,
       },
     ];
@@ -497,7 +497,7 @@ function parseRunSwitchStep(
 
   let defaultBlock:
     | {
-        steps: import("@exit-zero-labs/httpi-contracts").RunRequestStepDefinition[];
+        steps: import("@exit-zero-labs/runmark-contracts").RunRequestStepDefinition[];
       }
     | undefined;
   const defaultRec = asRecord(record.default);

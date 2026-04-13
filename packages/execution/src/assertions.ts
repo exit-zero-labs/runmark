@@ -8,7 +8,7 @@ import type {
   JsonValue,
   LatencyMatcher,
   RequestExpectation,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import { loadJsonSchema, validateAgainstSchema } from "./json-schema.js";
 import type { AggregateSummary } from "./percentiles.js";
 import { extractJsonPath } from "./request-outputs.js";

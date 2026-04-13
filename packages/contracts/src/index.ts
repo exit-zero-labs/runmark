@@ -136,11 +136,11 @@ export function toDisplayDiagnosticFile(filePath: string): string {
   }
 
   const normalizedPath = filePath.split(sep).join("/");
-  if (normalizedPath.startsWith("httpi/")) {
+  if (normalizedPath.startsWith("runmark/")) {
     return normalizedPath;
   }
 
-  for (const marker of ["/httpi/"]) {
+  for (const marker of ["/runmark/"]) {
     const markerIndex = normalizedPath.lastIndexOf(marker);
     if (markerIndex !== -1) {
       return normalizedPath.slice(markerIndex + 1);
@@ -196,7 +196,7 @@ export interface MutationConfirmation {
 /** Reporter output formats exposed by the CLI surface. */
 export type ReporterFormat = "junit" | "tap" | "github" | "json";
 
-/** Top-level tracked project config loaded from `httpi/config.yaml`. */
+/** Top-level tracked project config loaded from `runmark/config.yaml`. */
 export interface ProjectConfig {
   schemaVersion: typeof schemaVersion;
   project: string;
@@ -215,7 +215,7 @@ export interface EnvironmentGuards {
   denyHosts?: string[] | undefined;
 }
 
-/** Tracked non-secret environment values loaded from `httpi/env/*.env.yaml`. */
+/** Tracked non-secret environment values loaded from `runmark/env/*.env.yaml`. */
 export interface EnvironmentDefinition {
   schemaVersion: typeof schemaVersion;
   title?: string | undefined;
@@ -489,7 +489,7 @@ export interface CancelConfig {
   onSignal?: string[] | undefined;
 }
 
-/** Atomic request definition loaded from `httpi/requests/<path>.request.yaml`. */
+/** Atomic request definition loaded from `runmark/requests/<path>.request.yaml`. */
 export interface RequestDefinition {
   kind: "request";
   title?: string | undefined;
@@ -621,7 +621,7 @@ export type RunStepDefinition =
   | RunPollUntilStepDefinition
   | RunSwitchStepDefinition;
 
-/** Multi-step workflow definition loaded from `httpi/runs/<path>.run.yaml`. */
+/** Multi-step workflow definition loaded from `runmark/runs/<path>.run.yaml`. */
 export interface RunDefinition {
   kind: "run";
   title?: string | undefined;
@@ -814,7 +814,7 @@ export interface CompiledRunSnapshot {
   createdAt: string;
 }
 
-/** Top-level session states persisted under `httpi/artifacts/sessions/`. */
+/** Top-level session states persisted under `runmark/artifacts/sessions/`. */
 export type SessionState =
   | "created"
   | "running"
@@ -1014,7 +1014,7 @@ export interface ArtifactManifestEntry {
   sizeBytes?: number | undefined;
 }
 
-/** Manifest written alongside session artifacts under `httpi/artifacts/history/`. */
+/** Manifest written alongside session artifacts under `runmark/artifacts/history/`. */
 export interface ArtifactManifest {
   schemaVersion: typeof schemaVersion;
   sessionId: string;
@@ -1042,7 +1042,7 @@ export interface ResolvedRequestModel {
   streamConfig?: StreamConfig | undefined;
   // Binary response (A3): where to write the downloaded file and the upper
   // byte limit. Paths are relative to the project root and enforced to stay
-  // within `httpi/artifacts/` by the executor.
+  // within `runmark/artifacts/` by the executor.
   saveTo?: string | undefined;
   responseMaxBytes?: number | undefined;
 }

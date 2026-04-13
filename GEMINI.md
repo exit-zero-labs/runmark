@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - Gemini CLI Instructions
+# runmark - Gemini CLI Instructions
 
 @AGENTS.md
 

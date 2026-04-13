@@ -1,9 +1,9 @@
 import type {
   Diagnostic,
   EnrichedDiagnostic,
-} from "@exit-zero-labs/httpi-contracts";
-import { toDisplayDiagnosticFile } from "@exit-zero-labs/httpi-contracts";
-import { readUtf8File } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { toDisplayDiagnosticFile } from "@exit-zero-labs/runmark-contracts";
+import { readUtf8File } from "@exit-zero-labs/runmark-shared";
 import type { Node, Pair, ParsedNode, Scalar, YAMLMap, YAMLSeq } from "yaml";
 import { isMap, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
 
@@ -431,9 +431,9 @@ function defaultDiagnosticHint(diagnostic: Diagnostic): string {
     case "AUTH_CONFLICT":
       return "Choose either inline auth or uses.auth for this request, not both.";
     case "BODY_FILE_PATH_INVALID":
-      return "Update body.file so it points to a real tracked file inside httpi/bodies.";
+      return "Update body.file so it points to a real tracked file inside runmark/bodies.";
     case "BODY_FILE_NOT_FOUND":
-      return "Create the referenced body file or update body.file to an existing file inside httpi/bodies.";
+      return "Create the referenced body file or update body.file to an existing file inside runmark/bodies.";
     case "INVALID_JSON_BODY":
       return "Change body.json so it contains valid JSON-compatible data only.";
     case "INVALID_BODY_KIND":

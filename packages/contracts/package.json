@@ -1,8 +1,8 @@
 {
-  "name": "@exit-zero-labs/httpi-contracts",
+  "name": "@exit-zero-labs/runmark-contracts",
   "private": true,
   "version": "0.3.0",
-  "description": "Shared contracts for httpi.",
+  "description": "Shared contracts for runmark.",
   "type": "module",
   "license": "MIT",
   "author": "Exit Zero Labs LLC",
@@ -30,13 +30,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/exit-zero-labs/httpi.git",
+    "url": "https://github.com/exit-zero-labs/runmark.git",
     "directory": "packages/contracts"
   },
   "bugs": {
-    "url": "https://github.com/exit-zero-labs/httpi/issues"
+    "url": "https://github.com/exit-zero-labs/runmark/issues"
   },
-  "homepage": "https://github.com/exit-zero-labs/httpi#readme",
+  "homepage": "https://github.com/exit-zero-labs/runmark#readme",
   "scripts": {
     "build": "pnpm exec tsc -p tsconfig.json",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit"

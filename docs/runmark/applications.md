@@ -2,8 +2,8 @@
 
 # Runmark applications
 
-**Status**: Internal draft  
-**Current implementation name**: `httpi`  
+**Status**: Active reference  
+**Previous name**: `httpi`  
 **Companion docs**: [brand foundation](brand-foundation.md), [voice and messaging](voice-and-messaging.md), [visual system](visual-system.md), [rebrand transition](rebrand-transition.md)
 
 ---
@@ -11,60 +11,51 @@
 ## 1. Purpose
 
 This document shows how the Runmark system should be applied across repo-owned
-surfaces while the product is still in transition from `httpi`.
+surfaces now that the rename has shipped.
 
-The goal is not a full launch package yet. The goal is a contained, coherent
-set of in-repo materials that can guide future README, docs site, package, and
-rename work.
+The goal is consistency: one product name, one package name, one command, one
+folder layout, and one migration path for people who still know the product as
+`httpi`.
 
 ## 2. Docs site
 
 ### Goal
 
-Make the rebrand material feel like a designed draft section, not an orphaned
-internal memo.
+Make the docs site feel like the canonical Runmark home, not a partially
+renamed transition surface.
 
 ### Recommended structure
 
-1. Brand foundation
-2. Visual system
-3. Voice and messaging
-4. Applications
-5. Rebrand transition
+1. Quickstart
+2. Migration guide from `httpi`
+3. Brand foundation
+4. Voice and messaging
+5. Visual system
+6. Applications
+7. Rebrand transition
 
 ### Page behavior
 
 - use concise intros
 - prefer tables over long bullets for rules
-- keep draft status obvious
 - use card grids for navigation between Runmark pages
 - keep code and evidence examples on dark surfaces in both themes
-
-### Example blocks to show
-
-- a hero with one short statement and two CTAs
-- tracked intent vs local evidence diagram
-- comparison block against GUI clients and request-only tools
-- palette table with role guidance
-- approved phrases / avoid phrases table
 
 ## 3. README and GitHub surface
 
 ### Goal
 
-Keep the GitHub entry point honest while the implementation is still named
-`httpi`.
+Keep the GitHub entry point aligned with the shipped package, binary, and
+project layout.
 
 ### Recommended approach
 
-- keep the existing public README stable until the rename starts
-- prepare Runmark-ready copy blocks in repo docs
-- when migration begins, update the README in one pass with:
-  1. new brand name
-  2. clear migration note
-  3. current install and compatibility guidance
+- use `# Runmark` as the only primary product heading
+- install `@exit-zero-labs/runmark`
+- show `runmark/` and `runmark/artifacts/` in all file trees
+- link the migration guide when historical `httpi` users need context
 
-### README structure for launch
+### README structure
 
 1. `# Runmark`
 2. one-paragraph product definition
@@ -86,10 +77,10 @@ Make Runmark feel like a serious tool without over-branding the CLI.
 - CLI help should stay neutral and dense
 - product pages can carry more serif-led identity
 - screenshots should favor:
-  - command output
-  - file trees
-  - saved run state
-  - explicit pause/resume moments
+  1. command output
+  2. file trees
+  3. saved run state
+  4. explicit pause/resume moments
 
 ### Avoid
 
@@ -140,25 +131,24 @@ Keep short-form launch material tied to the repo-native workflow story.
 - **Tracked definitions. Local evidence. One engine.**
 - **Pause, inspect, resume.**
 
-## 7. Rebrand transition labels
+## 7. Historical-name guidance
 
-While the codebase is still `httpi`, use transition phrasing consistently:
+Use `httpi` only when a surface is explicitly helping an existing user migrate:
 
-- **Runmark (currently implemented as `httpi`)**
-- **Runmark draft**
-- **Current command/package names still use `httpi`**
+- migration docs
+- release notes
+- compatibility FAQs
+- before/after mapping tables
 
-Avoid a split identity where new docs assume the rename is complete but the
-actual repo and package surfaces still say `httpi`.
+Avoid dual naming on normal product pages. Outside migration context, the
+canonical name is **Runmark**.
 
 ## 8. Application checklist
 
-Use this checklist when applying Runmark later to public surfaces:
-
 | Surface | Must show | Must avoid |
 | --- | --- | --- |
-| docs site | repo-native job, file tree, workflow loop, draft note if needed | orphaned brand page with no context |
-| README | clear product statement, install, migration note | mixed `httpi` and `runmark` without explanation |
+| docs site | repo-native job, file tree, workflow loop, migration guide for old users | stale “draft” framing or broken old-name links |
+| README | clear product statement, install, migration link | mixed `httpi` and `runmark` without a mapping purpose |
 | screenshots | files, CLI, saved outputs, explicit state | fake UI or dashboards |
 | comparisons | repo files vs workspace, saved outputs vs hidden state | “X killer” framing |
 | launch copy | clear rename reason, workflow/evidence story | protocol-only framing |

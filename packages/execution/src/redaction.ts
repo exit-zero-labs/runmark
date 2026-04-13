@@ -4,13 +4,13 @@ import type {
   ResolvedRequestModel,
   SessionRecord,
   VariableExplanation,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 import {
   looksLikeSecretFieldName,
   redactedValue,
   redactHeaders,
   redactText,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 
 export function redactResolvedRequestModel(
   request: ResolvedRequestModel,

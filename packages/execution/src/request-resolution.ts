@@ -3,15 +3,15 @@ import type {
   CompiledRequestStep,
   CompiledRunSnapshot,
   FlatVariableValue,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
-import { loadSecrets } from "@exit-zero-labs/httpi-runtime";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
+import { loadSecrets } from "@exit-zero-labs/runmark-runtime";
 import {
   exitCodes,
-  HttpiError,
+  RunmarkError,
   mergeStringRecords,
   normalizeHeaderName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { resolveRequestBody } from "./request-body.js";
 import { uniqueSecretValues } from "./request-secrets.js";
 import {
@@ -260,7 +260,7 @@ async function resolveAuthHeaders(
         const errorBody = await tokenResponse
           .text()
           .catch(() => "<unreadable>");
-        throw new HttpiError(
+        throw new RunmarkError(
           "OAUTH2_TOKEN_FAILED",
           `OAuth2 token endpoint returned HTTP ${tokenResponse.status}: ${errorBody.slice(0, 200)}`,
           { exitCode: exitCodes.executionFailure },
@@ -272,7 +272,7 @@ async function resolveAuthHeaders(
           ? tokenData.access_token
           : undefined;
       if (!accessToken) {
-        throw new HttpiError(
+        throw new RunmarkError(
           "OAUTH2_TOKEN_FAILED",
           "OAuth2 token endpoint returned no access_token.",
           { exitCode: exitCodes.executionFailure },
@@ -287,8 +287,8 @@ async function resolveAuthHeaders(
         ]),
       };
     } catch (error) {
-      if (error instanceof HttpiError) throw error;
-      throw new HttpiError(
+      if (error instanceof RunmarkError) throw error;
+      throw new RunmarkError(
         "OAUTH2_TOKEN_FAILED",
         `OAuth2 token request failed: ${error instanceof Error ? error.message : String(error)}`,
         { exitCode: exitCodes.executionFailure, cause: error },
@@ -369,7 +369,7 @@ function validateTimeoutMs(
   }
 
   const message = `Request ${requestId} step ${stepId} resolved an invalid timeoutMs value (${timeoutMs}). timeoutMs must be a positive number.`;
-  throw new HttpiError("REQUEST_TIMEOUT_INVALID", message, {
+  throw new RunmarkError("REQUEST_TIMEOUT_INVALID", message, {
     exitCode: exitCodes.validationFailure,
     details: timeoutSource.filePath
       ? [

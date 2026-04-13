@@ -9,9 +9,9 @@ import type {
   RequestExpectation,
   RequestUses,
   ResponseConfig,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
-import { asRecord } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
+import { asRecord } from "@exit-zero-labs/runmark-shared";
 import {
   expectRecord,
   isJsonValue,
@@ -893,7 +893,7 @@ function parseOptionalResponseConfig(
   }
 
   const saveTo = typeof record.saveTo === "string" ? record.saveTo : undefined;
-  warnIfSaveToEscapesHttpi(saveTo, filePath, diagnostics);
+  warnIfSaveToEscapesRunmark(saveTo, filePath, diagnostics);
   return {
     mode,
     stream,
@@ -902,7 +902,7 @@ function parseOptionalResponseConfig(
   };
 }
 
-function warnIfSaveToEscapesHttpi(
+function warnIfSaveToEscapesRunmark(
   saveTo: string | undefined,
   filePath: string,
   diagnostics: Diagnostic[],
@@ -915,9 +915,9 @@ function warnIfSaveToEscapesHttpi(
   const isAbsolute =
     normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized);
   const hasParentTraversal = segments.some((seg) => seg === "..");
-  const outsideHttpi =
-    !normalized.startsWith("httpi/artifacts/") &&
-    !normalized.startsWith("./httpi/artifacts/");
+  const outsideRunmark =
+    !normalized.startsWith("runmark/artifacts/") &&
+    !normalized.startsWith("./runmark/artifacts/");
 
   // Security: an absolute path or one that climbs above the project root is
   // a filesystem write primitive (can overwrite arbitrary files). Escalate
@@ -927,20 +927,20 @@ function warnIfSaveToEscapesHttpi(
     diagnostics.push({
       level: "error",
       code: "BINARY_SAVE_TO_UNSAFE_PATH",
-      message: `response.saveTo=${saveTo} would resolve outside the project tree. Use a path inside httpi/artifacts/ (recommended) or a project-relative directory.`,
+      message: `response.saveTo=${saveTo} would resolve outside the project tree. Use a path inside runmark/artifacts/ (recommended) or a project-relative directory.`,
       filePath,
       path: "response.saveTo",
     });
     return;
   }
 
-  // Path stays inside the project but outside httpi/artifacts/: allowed, warn so the
+  // Path stays inside the project but outside runmark/artifacts/: allowed, warn so the
   // reviewer notices the explicit opt-out of the runtime sandbox.
-  if (outsideHttpi) {
+  if (outsideRunmark) {
     diagnostics.push({
       level: "warning",
-      code: "BINARY_SAVE_TO_OUTSIDE_HTTPI",
-      message: `response.saveTo=${saveTo} writes outside httpi/artifacts/. This is allowed but bypasses the default runtime sandbox — double-check that the target directory is intended and owned by this project.`,
+      code: "BINARY_SAVE_TO_OUTSIDE_RUNMARK",
+      message: `response.saveTo=${saveTo} writes outside runmark/artifacts/. This is allowed but bypasses the default runtime sandbox — double-check that the target directory is intended and owned by this project.`,
       filePath,
       path: "response.saveTo",
     });

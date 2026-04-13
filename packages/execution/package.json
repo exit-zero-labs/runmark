@@ -1,8 +1,8 @@
 {
-  "name": "@exit-zero-labs/httpi-execution",
+  "name": "@exit-zero-labs/runmark-execution",
   "private": true,
   "version": "0.3.0",
-  "description": "Execution orchestration for httpi.",
+  "description": "Execution orchestration for runmark.",
   "type": "module",
   "license": "MIT",
   "author": "Exit Zero Labs LLC",
@@ -28,22 +28,22 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/exit-zero-labs/httpi.git",
+    "url": "https://github.com/exit-zero-labs/runmark.git",
     "directory": "packages/execution"
   },
   "bugs": {
-    "url": "https://github.com/exit-zero-labs/httpi/issues"
+    "url": "https://github.com/exit-zero-labs/runmark/issues"
   },
-  "homepage": "https://github.com/exit-zero-labs/httpi#readme",
+  "homepage": "https://github.com/exit-zero-labs/runmark#readme",
   "scripts": {
     "build": "pnpm exec tsc -p tsconfig.json",
     "typecheck": "pnpm exec tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@exit-zero-labs/httpi-contracts": "workspace:*",
-    "@exit-zero-labs/httpi-definitions": "workspace:*",
-    "@exit-zero-labs/httpi-http": "workspace:*",
-    "@exit-zero-labs/httpi-runtime": "workspace:*",
-    "@exit-zero-labs/httpi-shared": "workspace:*"
+    "@exit-zero-labs/runmark-contracts": "workspace:*",
+    "@exit-zero-labs/runmark-definitions": "workspace:*",
+    "@exit-zero-labs/runmark-http": "workspace:*",
+    "@exit-zero-labs/runmark-runtime": "workspace:*",
+    "@exit-zero-labs/runmark-shared": "workspace:*"
   }
 }

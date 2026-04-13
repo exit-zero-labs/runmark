@@ -13,17 +13,17 @@ import type {
   JsonValue,
   ResolvedRequestModel,
   StreamChunkRecord,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 
 type StreamAssembledLast = JsonValue;
 
 import {
   coerceErrorMessage,
   exitCodes,
-  HttpiError,
-} from "@exit-zero-labs/httpi-shared";
+  RunmarkError,
+} from "@exit-zero-labs/runmark-shared";
 
-export class HttpExecutionError extends HttpiError {
+export class HttpExecutionError extends RunmarkError {
   readonly capture: HttpExecutionCapture;
 
   constructor(
@@ -110,7 +110,7 @@ export async function executeHttpRequest(
   }
 
   // Combine timeout + external cancel into a single signal so mid-flight
-  // fetches honor `httpi cancel` and SIGINT even before the read loop starts.
+  // fetches honor `runmark cancel` and SIGINT even before the read loop starts.
   const abortController = new AbortController();
   const timeoutSignal = AbortSignal.timeout(request.timeoutMs);
   const onTimeout = (): void => abortController.abort(timeoutSignal.reason);
@@ -268,7 +268,7 @@ async function executeStreamingResponse(
 
   let cancelled = false;
   // Race the read against a periodic cancel poll so a server that holds the
-  // connection open but stops emitting chunks still honors `httpi cancel` and
+  // connection open but stops emitting chunks still honors `runmark cancel` and
   // SIGINT within ~100 ms (A2 SRE fix). Without this the cancel marker would
   // only be observed after the next chunk arrives, which may be never.
   const readWithCancelPoll = async (): Promise<
@@ -534,7 +534,7 @@ async function executeBinaryResponse(
   } = await import("node:path");
 
   if (!request.saveTo) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "BINARY_SAVE_TO_REQUIRED",
       "response.mode: binary requires response.saveTo to be set.",
       { exitCode: exitCodes.validationFailure },

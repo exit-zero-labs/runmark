@@ -13,7 +13,7 @@ import type {
   ResolvedRequestModel,
   SessionRecord,
   VariableExplanation,
-} from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
 
 /** Common location options accepted by CLI and MCP entrypoints. */
 export interface EngineOptions {
@@ -21,7 +21,7 @@ export interface EngineOptions {
   projectRoot?: string | undefined;
 }
 
-/** Result returned by `httpi init` after writing starter project files. */
+/** Result returned by `runmark init` after writing starter project files. */
 export interface InitProjectResult {
   rootDir: string;
   createdPaths: string[];

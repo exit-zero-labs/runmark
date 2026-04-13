@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - AI Agent Guide
+# runmark - AI Agent Guide
 
 Universal repository guidance for AI coding agents.
 

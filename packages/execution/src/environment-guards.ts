@@ -2,9 +2,9 @@ import { execSync } from "node:child_process";
 import type {
   EnrichedDiagnostic,
   EnvironmentGuards,
-} from "@exit-zero-labs/httpi-contracts";
-import { finalizeDiagnostic } from "@exit-zero-labs/httpi-definitions";
-import { exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { finalizeDiagnostic } from "@exit-zero-labs/runmark-definitions";
+import { exitCodes, RunmarkError } from "@exit-zero-labs/runmark-shared";
 
 export interface GuardFlags {
   [flag: string]: boolean | undefined;
@@ -142,7 +142,7 @@ export function evaluateEnvironmentGuards(
   }
 
   if (failures.length > 0) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ENVIRONMENT_GUARD_FAILED",
       `${failures.length} environment guard(s) blocked execution against ${envId}.`,
       {

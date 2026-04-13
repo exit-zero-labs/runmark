@@ -4,12 +4,12 @@
  * The CLI keeps engine errors structured as long as possible, then translates
  * them into stable exit codes and readable terminal output at the final edge.
  */
-import { type Diagnostic, isDiagnostic } from "@exit-zero-labs/httpi-contracts";
+import { type Diagnostic, isDiagnostic } from "@exit-zero-labs/runmark-contracts";
 import {
   coerceErrorMessage,
   exitCodes,
-  isHttpiError,
-} from "@exit-zero-labs/httpi-shared";
+  isRunmarkError,
+} from "@exit-zero-labs/runmark-shared";
 
 /** Terminal-friendly failure shape returned by the CLI error adapter. */
 export interface CliFailure {
@@ -19,7 +19,7 @@ export interface CliFailure {
 
 /** Convert any thrown value into a CLI message plus exit code. */
 export function toCliFailure(error: unknown): CliFailure {
-  if (isHttpiError(error)) {
+  if (isRunmarkError(error)) {
     return {
       message: renderCliFailureMessage(error.message, error.details),
       exitCode: error.exitCode,

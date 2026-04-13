@@ -1,10 +1,10 @@
 <!-- @format -->
 
-# httpi - Agent Guide
+# Runmark - Agent Guide
 
-This guide is for coding agents and MCP clients that need a reliable, inspectable way to validate HTTP workflows with `httpi`.
+This guide is for coding agents and MCP clients that need a reliable, inspectable way to validate HTTP workflows with `runmark`.
 
-`httpi` is already documented thoroughly in [`README.md`](../README.md), [`product.md`](product.md), and [`architecture.md`](architecture.md). This document narrows that down to the execution loop agents most often need in practice.
+`runmark` is already documented thoroughly in [`README.md`](../README.md), [`product.md`](product.md), and [`architecture.md`](architecture.md). This document narrows that down to the execution loop agents most often need in practice.
 
 ## 1. Choose the surface
 
@@ -29,14 +29,14 @@ The safest default loop for an agent is:
 CLI example:
 
 ```bash
-httpi list runs
-httpi validate
-httpi describe --run smoke
-httpi run --run smoke
-httpi session show <sessionId>
-httpi artifacts list <sessionId>
-httpi artifacts read <sessionId> steps/login/attempt-1/request.json
-httpi resume <sessionId>
+runmark list runs
+runmark validate
+runmark describe --run smoke
+runmark run --run smoke
+runmark session show <sessionId>
+runmark artifacts list <sessionId>
+runmark artifacts read <sessionId> steps/login/attempt-1/request.json
+runmark resume <sessionId>
 ```
 
 MCP equivalent:
@@ -54,7 +54,7 @@ MCP equivalent:
 | inspect resolved values | `explain_variables` |
 | continue a paused or failed session | `resume_session` |
 
-Every MCP tool call must include `projectRoot`, because `httpi mcp` does not bind the server to a project when it starts.
+Every MCP tool call must include `projectRoot`, because `runmark mcp` does not bind the server to a project when it starts.
 
 ## 3. MCP tool constraints that matter
 
@@ -82,7 +82,7 @@ Unsafe example:
 
 ## 4. How to inspect a paused or failed run
 
-When `httpi` executes a run, it persists a session record and artifacts under `httpi/artifacts/`.
+When `runmark` executes a run, it persists a session record and artifacts under `runmark/artifacts/`.
 
 - `session show` / `get_session_state` tells you the session state, the failed or next step, and redacted step outputs
 - `artifacts list` / `list_artifacts` shows which files were captured
@@ -99,12 +99,12 @@ For the canonical pause flow, use [`examples/pause-resume`](../examples/pause-re
 
 That flow is pinned by:
 
-- [`testing/httpi/httpi.e2e.test.mjs`](../testing/httpi/httpi.e2e.test.mjs)
-- [`testing/httpi/judge/basic-flow.md`](../testing/httpi/judge/basic-flow.md)
+- [`testing/runmark/runmark.e2e.test.mjs`](../testing/runmark/runmark.e2e.test.mjs)
+- [`testing/runmark/judge/basic-flow.md`](../testing/runmark/judge/basic-flow.md)
 
 ## 5. What `[REDACTED]` means
 
-`httpi` redacts secrets consistently across CLI output, MCP tool results, session JSON, and artifact reads.
+`runmark` redacts secrets consistently across CLI output, MCP tool results, session JSON, and artifact reads.
 
 When you see `[REDACTED]`, assume:
 
@@ -123,7 +123,7 @@ Useful signals that still remain visible:
 
 ## 6. Handling drift and exit code 3
 
-`httpi` blocks resume when tracked definitions drift or another process holds the session lock.
+`runmark` blocks resume when tracked definitions drift or another process holds the session lock.
 
 CLI exit codes:
 
@@ -156,14 +156,14 @@ This is especially useful before resume-aware workflows where later steps depend
 
 Treat:
 
-- `httpi/` as the tracked source of truth
-- `httpi/artifacts/` as the local runtime record of what already happened
+- `runmark/` as the tracked source of truth
+- `runmark/artifacts/` as the local runtime record of what already happened
 
 That split is important for agents:
 
 - tracked request and run definitions are reviewable and diffable
 - session and artifact files are evidence, not authoring input
-- in normal projects, `httpi/artifacts/secrets.yaml` must stay out of Git
+- in normal projects, `runmark/artifacts/secrets.yaml` must stay out of Git
 
 ## 9. Best next document
 
@@ -171,4 +171,4 @@ After this guide, the most useful references are:
 
 - [`README.md`](../README.md) for the public quick start and troubleshooting flow
 - [`architecture.md`](architecture.md) for execution semantics and package boundaries
-- [`testing/httpi/README.md`](../testing/httpi/README.md) for automated coverage and judge assets
+- [`testing/runmark/README.md`](../testing/runmark/README.md) for automated coverage and judge assets

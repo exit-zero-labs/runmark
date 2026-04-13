@@ -16,15 +16,15 @@ import type {
   FlatVariableMap,
   ListDefinitionsResult,
   SessionStateResult,
-} from "@exit-zero-labs/httpi-contracts";
-import { isDiagnostic } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { isDiagnostic } from "@exit-zero-labs/runmark-contracts";
 import {
   compileRequestSnapshot,
   compileRunSnapshot,
   enrichDiagnosticsFromFiles,
   finalizeDiagnostic,
   findProjectRoot,
-} from "@exit-zero-labs/httpi-definitions";
+} from "@exit-zero-labs/runmark-definitions";
 import {
   createSessionRecord,
   detectDefinitionDrift,
@@ -39,9 +39,9 @@ import {
   type StreamChunksResult,
   touchSession,
   writeSession,
-} from "@exit-zero-labs/httpi-runtime";
+} from "@exit-zero-labs/runmark-runtime";
 
-export { installSignalCancelHandler } from "@exit-zero-labs/httpi-runtime";
+export { installSignalCancelHandler } from "@exit-zero-labs/runmark-runtime";
 
 import {
   applyMask,
@@ -73,7 +73,7 @@ export async function acceptSnapshotForStep(
   const session = await readSession(rootDir, sessionId);
   const stepRecord = session.stepRecords[stepId];
   if (!stepRecord) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "STEP_NOT_FOUND",
       `Step ${stepId} is not present in session ${sessionId}.`,
       { exitCode: exitCodes.validationFailure },
@@ -83,7 +83,7 @@ export async function acceptSnapshotForStep(
     s.kind === "request" ? s.id === stepId : false,
   );
   if (!compiledStep || compiledStep.kind !== "request") {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SNAPSHOT_STEP_NOT_REQUEST",
       `Step ${stepId} is not a request step.`,
       { exitCode: exitCodes.validationFailure },
@@ -91,7 +91,7 @@ export async function acceptSnapshotForStep(
   }
   const body = compiledStep.request.expect?.body;
   if (!body || body.kind !== "snapshot" || !body.file) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SNAPSHOT_NOT_DECLARED",
       `Step ${stepId} does not declare expect.body.kind: snapshot with a file:.`,
       { exitCode: exitCodes.validationFailure },
@@ -101,7 +101,7 @@ export async function acceptSnapshotForStep(
   const lastAttempt = stepRecord.attempts[stepRecord.attempts.length - 1];
   const bodyRel = lastAttempt?.artifacts?.bodyPath;
   if (!bodyRel) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SNAPSHOT_BODY_MISSING",
       `No response body artifact captured for step ${stepId}; re-run with capture.responseBody: full.`,
       { exitCode: exitCodes.validationFailure },
@@ -127,7 +127,7 @@ export async function acceptSnapshotForStep(
   return { sessionId, stepId, snapshotPath, wrote: true };
 }
 
-import { exitCodes, HttpiError } from "@exit-zero-labs/httpi-shared";
+import { exitCodes, RunmarkError } from "@exit-zero-labs/runmark-shared";
 import { describeCompiledStep, selectExplainStep } from "./describe.js";
 import {
   buildCompileOptions,
@@ -317,7 +317,7 @@ export async function resumeSessionRun(
   const session = await readSession(rootDir, sessionId);
 
   if (session.state !== "paused" && session.state !== "failed") {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SESSION_NOT_RESUMABLE",
       `Session ${sessionId} is ${session.state} and cannot be resumed.`,
       { exitCode: exitCodes.unsafeResume },
@@ -328,7 +328,7 @@ export async function resumeSessionRun(
     await detectDefinitionDrift(rootDir, session),
   );
   if (driftDiagnostics.some((diagnostic) => diagnostic.level === "error")) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SESSION_DRIFT_DETECTED",
       `Session ${sessionId} cannot be resumed because tracked definitions changed.`,
       {
@@ -453,7 +453,7 @@ export async function explainVariables(
     const context = await loadProjectContext(options);
 
     if (options.requestId && options.runId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "EXPLAIN_TARGET_AMBIGUOUS",
         "Explain variables accepts either requestId or runId, not both.",
         { exitCode: exitCodes.validationFailure },
@@ -484,7 +484,7 @@ export async function explainVariables(
     }
 
     if (!options.runId) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "EXPLAIN_TARGET_REQUIRED",
         "Explain variables requires either requestId or runId.",
         { exitCode: exitCodes.validationFailure },
@@ -514,20 +514,20 @@ export async function explainVariables(
   });
 }
 
-/** Enrich file-backed diagnostics before surfacing HttpiError details publicly. */
+/** Enrich file-backed diagnostics before surfacing RunmarkError details publicly. */
 async function withEnrichedDiagnosticErrors<TResult>(
   action: () => Promise<TResult>,
 ): Promise<TResult> {
   try {
     return await action();
   } catch (error) {
-    throw await enrichHttpiErrorDiagnostics(error);
+    throw await enrichRunmarkErrorDiagnostics(error);
   }
 }
 
-/** Best-effort enrichment for diagnostic arrays already attached to an HttpiError. */
-async function enrichHttpiErrorDiagnostics(error: unknown): Promise<unknown> {
-  if (!(error instanceof HttpiError) || !Array.isArray(error.details)) {
+/** Best-effort enrichment for diagnostic arrays already attached to an RunmarkError. */
+async function enrichRunmarkErrorDiagnostics(error: unknown): Promise<unknown> {
+  if (!(error instanceof RunmarkError) || !Array.isArray(error.details)) {
     return error;
   }
 
@@ -545,7 +545,7 @@ async function enrichHttpiErrorDiagnostics(error: unknown): Promise<unknown> {
     );
   }
 
-  return new HttpiError(error.code, error.message, {
+  return new RunmarkError(error.code, error.message, {
     cause: error.cause,
     exitCode: error.exitCode,
     details: enrichedDiagnostics,

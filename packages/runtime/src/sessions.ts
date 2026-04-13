@@ -1,5 +1,5 @@
 /**
- * Session persistence for `httpi/artifacts/sessions/*.json`.
+ * Session persistence for `runmark/artifacts/sessions/*.json`.
  *
  * Sessions are the durable execution ledger for pause/resume, inspection, and
  * safety checks. This file owns their creation, validation, and atomic writes.
@@ -10,19 +10,19 @@ import type {
   SessionRecord,
   SessionStepRecord,
   StepState,
-} from "@exit-zero-labs/httpi-contracts";
-import { schemaVersion } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { schemaVersion } from "@exit-zero-labs/runmark-contracts";
 import {
   createSessionId,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   readJsonFile,
   resolveFromRoot,
   runtimeDirectoryName,
   toIsoTimestamp,
   writeJsonFileAtomic,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import {
   assertProjectOwnedFileIfExists,
   assertValidSessionId,
@@ -106,7 +106,7 @@ export function createSessionRecord(
   };
 }
 
-/** Persist a complete session record atomically under `httpi/artifacts/sessions/`. */
+/** Persist a complete session record atomically under `runmark/artifacts/sessions/`. */
 export async function writeSession(
   projectRoot: string,
   session: SessionRecord,
@@ -130,7 +130,7 @@ export async function readSession(
   const runtimePaths = await ensureRuntimePaths(projectRoot);
   const sessionPaths = getSessionRuntimePaths(runtimePaths, sessionId);
   if (!(await fileExists(sessionPaths.sessionPath))) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "SESSION_NOT_FOUND",
       `Session ${sessionId} was not found.`,
       { exitCode: exitCodes.validationFailure },
@@ -196,7 +196,7 @@ export function updateStepState(
 ): SessionRecord {
   const currentStepRecord = session.stepRecords[stepId];
   if (!currentStepRecord) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "STEP_NOT_FOUND",
       `Step ${stepId} is not present in session ${session.sessionId}.`,
       { exitCode: exitCodes.internalError },
@@ -240,7 +240,7 @@ function assertValidSessionRecord(
     return;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "SESSION_INVALID",
     `Session ${sessionId} is invalid or unreadable.`,
     { exitCode: exitCodes.validationFailure },

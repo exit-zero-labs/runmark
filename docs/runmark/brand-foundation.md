@@ -2,9 +2,8 @@
 
 # Runmark brand foundation
 
-**Status**: Internal draft  
-**Current implementation name**: `httpi`  
-**Target brand**: `Runmark`  
+**Status**: Active reference  
+**Previous name**: `httpi`  
 **Companion docs**: [voice and messaging](voice-and-messaging.md), [visual system](visual-system.md), [applications](applications.md), [rebrand transition](rebrand-transition.md)
 
 ---

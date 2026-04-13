@@ -14,17 +14,17 @@ import type {
   RequestFile,
   RunRequestStepDefinition,
   RunStepDefinition,
-} from "@exit-zero-labs/httpi-contracts";
-import { schemaVersion } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { schemaVersion } from "@exit-zero-labs/runmark-contracts";
 import {
   assertPathWithin,
   exitCodes,
-  HttpiError,
+  RunmarkError,
   hashProcessEnvValue,
   resolveFromRoot,
   sha256Hex,
   toIsoTimestamp,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 
 export interface CompileSnapshotOptions {
   envId?: string | undefined;
@@ -41,7 +41,7 @@ export function assertProjectIsValid(project: ProjectFiles): void {
     return;
   }
 
-  throw new HttpiError(
+  throw new RunmarkError(
     "PROJECT_INVALID",
     "Project definitions contain validation errors.",
     {
@@ -60,7 +60,7 @@ export function compileRunSnapshot(
 
   const runFile = project.runs[runId];
   if (!runFile) {
-    throw new HttpiError("RUN_NOT_FOUND", `Run ${runId} was not found.`, {
+    throw new RunmarkError("RUN_NOT_FOUND", `Run ${runId} was not found.`, {
       exitCode: exitCodes.validationFailure,
     });
   }
@@ -127,7 +127,7 @@ export function compileRequestSnapshot(
 
   const requestFile = project.requests[requestId];
   if (!requestFile) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "REQUEST_NOT_FOUND",
       `Request ${requestId} was not found.`,
       { exitCode: exitCodes.validationFailure },
@@ -264,7 +264,7 @@ function compileRunRequestStep(
 ): CompiledRequestStep {
   const requestFile = project.requests[step.uses];
   if (!requestFile) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "REQUEST_NOT_FOUND",
       `Request ${step.uses} was not found.`,
       { exitCode: exitCodes.validationFailure },
@@ -292,7 +292,7 @@ function compileRequestDefinition(
     (headerBlockId) => {
       const headerBlock = project.headerBlocks[headerBlockId];
       if (!headerBlock) {
-        throw new HttpiError(
+        throw new RunmarkError(
           "HEADER_BLOCK_NOT_FOUND",
           `Header block ${headerBlockId} was not found.`,
           { exitCode: exitCodes.validationFailure },
@@ -314,7 +314,7 @@ function compileRequestDefinition(
   if (requestFile.definition.uses?.auth) {
     const authBlockFile = project.authBlocks[requestFile.definition.uses.auth];
     if (!authBlockFile) {
-      throw new HttpiError(
+      throw new RunmarkError(
         "AUTH_BLOCK_NOT_FOUND",
         `Auth block ${requestFile.definition.uses.auth} was not found.`,
         { exitCode: exitCodes.validationFailure },
@@ -370,18 +370,18 @@ function trackRequestBodyFileHash(
   try {
     assertPathWithin(bodiesDirectory, bodyFilePath, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyFileDiagnosticError(
         requestFile.filePath,
         error.message,
-        "Update body.file so it points to a real tracked file inside httpi/bodies.",
+        "Update body.file so it points to a real tracked file inside runmark/bodies.",
       );
     }
 
@@ -401,18 +401,18 @@ function trackRequestBodyFileHash(
   try {
     assertPathWithin(resolvedBodiesDirectory, resolvedBodyFilePath, {
       code: "BODY_FILE_PATH_INVALID",
-      message: `Body file ${bodyDefinition.file} must stay within httpi/bodies.`,
+      message: `Body file ${bodyDefinition.file} must stay within runmark/bodies.`,
       exitCode: exitCodes.validationFailure,
     });
   } catch (error) {
     if (
-      error instanceof HttpiError &&
+      error instanceof RunmarkError &&
       error.code === "BODY_FILE_PATH_INVALID"
     ) {
       throw buildBodyFileDiagnosticError(
         requestFile.filePath,
         error.message,
-        "Update body.file so it points to a real tracked file inside httpi/bodies.",
+        "Update body.file so it points to a real tracked file inside runmark/bodies.",
       );
     }
 
@@ -435,8 +435,8 @@ function buildBodyFileDiagnosticError(
   filePath: string,
   message: string,
   hint: string,
-): HttpiError {
-  return new HttpiError("BODY_FILE_PATH_INVALID", message, {
+): RunmarkError {
+  return new RunmarkError("BODY_FILE_PATH_INVALID", message, {
     exitCode: exitCodes.validationFailure,
     details: [
       {
@@ -511,7 +511,7 @@ function resolveEnvironmentFile(
 ): EnvironmentFile {
   const envId = requestedEnvId ?? project.config.defaultEnv;
   if (!envId) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ENV_NOT_SPECIFIED",
       "No environment was provided and the project has no defaultEnv.",
       { exitCode: exitCodes.validationFailure },
@@ -520,7 +520,7 @@ function resolveEnvironmentFile(
 
   const envFile = project.environments[envId];
   if (!envFile) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ENV_NOT_FOUND",
       `Environment ${envId} was not found.`,
       { exitCode: exitCodes.validationFailure },

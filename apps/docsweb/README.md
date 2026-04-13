@@ -1,6 +1,6 @@
 # docsweb
 
-Starlight docs site for `httpi`, intended to ship at <https://httpi.exitzerolabs.com>.
+Starlight docs site for `runmark`, intended to ship at <https://runmark.exitzerolabs.com>.
 
 ## Commands
 
@@ -8,14 +8,14 @@ Run these from the repository root:
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm --filter @exit-zero-labs/httpi-docsweb dev` | start the local docs site |
-| `pnpm --filter @exit-zero-labs/httpi-docsweb typecheck` | run Astro type checks |
-| `pnpm --filter @exit-zero-labs/httpi-docsweb build` | build the static site |
-| `pnpm --filter @exit-zero-labs/httpi-docsweb sync:content` | regenerate synced docs pages from repo sources |
+| `pnpm --filter @exit-zero-labs/runmark-docsweb dev` | start the local docs site |
+| `pnpm --filter @exit-zero-labs/runmark-docsweb typecheck` | run Astro type checks |
+| `pnpm --filter @exit-zero-labs/runmark-docsweb build` | build the static site |
+| `pnpm --filter @exit-zero-labs/runmark-docsweb sync:content` | regenerate synced docs pages from repo sources |
 
 ## Deployment
 
-This site is intended to ship at <https://httpi.exitzerolabs.com> via
+This site is intended to ship at <https://runmark.exitzerolabs.com> via
 Vercel's native Git integration for the monorepo. Keep `apps/docsweb` as the
 project root in Vercel and let Vercel handle preview deployments for pull
 requests plus production deployments from `main`.
@@ -37,13 +37,13 @@ directory is intentionally Git-ignored.
 
 ### Custom domain on Cloudflare
 
-1. Add `httpi.exitzerolabs.com` to the Vercel project's **Settings → Domains**
+1. Add `runmark.exitzerolabs.com` to the Vercel project's **Settings → Domains**
    page.
 2. If you are using the CLI for domain setup, run `pnpm dlx vercel link` from
    the repository root once, then run
-   `pnpm dlx vercel domains inspect httpi.exitzerolabs.com` to see the exact
+   `pnpm dlx vercel domains inspect runmark.exitzerolabs.com` to see the exact
    DNS target Vercel expects for the subdomain.
-3. In Cloudflare DNS, create a `CNAME` record with name `httpi` and target the
+3. In Cloudflare DNS, create a `CNAME` record with name `runmark` and target the
    Vercel-provided value. For a normal subdomain this is usually
    `cname.vercel-dns-0.com`, but use the exact value Vercel shows for the
    project.

@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - Product Overview
+# Runmark - Product Overview
 
 **Status**: Current v0  
 **Audience**: Humans first; still useful context for AI agents  
@@ -8,11 +8,11 @@
 
 ---
 
-## 1. What `httpi` is
+## 1. What `runmark` is
 
-`httpi` is an open-source HTTP client, CLI, and MCP project for running API workflows from files that live in your repository.
+`runmark` is an open-source HTTP client, CLI, and MCP project for running API workflows from files that live in your repository.
 
-Instead of hiding everything inside a GUI collection or a local desktop session, `httpi` treats requests, environments, and multi-step runs as readable project files. That makes them easy to review in Git, easy to evolve with the API they exercise, and easy for both humans and coding agents to understand.
+Instead of hiding everything inside a GUI collection or a local desktop session, `runmark` treats requests, environments, and multi-step runs as readable project files. That makes them easy to review in Git, easy to evolve with the API they exercise, and easy for both humans and coding agents to understand.
 
 ## 2. Why it exists
 
@@ -27,11 +27,11 @@ Most API testing tools are good at sending requests, but they break down when th
 
 The motivating use case is simple: you are actively changing an API, often with an AI coding agent helping, and you need a clear way to validate real HTTP flows before and after each change. Some requests are independent, some must run in sequence, some should pause for inspection, and every response should be captured somewhere predictable.
 
-`httpi` is designed around that workflow.
+`runmark` is designed around that workflow.
 
 ## 3. The core promise
 
-`httpi` should feel like:
+`runmark` should feel like:
 
 1. **A file-based HTTP client** that lives comfortably inside a real codebase.
 2. **A workflow runner** that can express sequential, parallel, and pause-aware API flows.
@@ -52,16 +52,16 @@ Claude Code, GitHub Copilot, and other agents that need a stable, inspectable wa
 
 Teams who want request logic, env shape, and expected outcomes to live in plain files that can be reviewed, discussed, and versioned like any other source file.
 
-## 5. What makes `httpi` different
+## 5. What makes `runmark` different
 
 ### Git-tracked intent, local runtime state
 
 The important definitions live in tracked files. Local runtime state lives in a Git-ignored directory.
 
-That gives `httpi` a clean split:
+That gives `runmark` a clean split:
 
-- `httpi/` describes **what should happen**
-- `httpi/artifacts/` stores **what did happen**
+- `runmark/` describes **what should happen**
+- `runmark/artifacts/` stores **what did happen**
 
 ### Request-first authoring
 
@@ -73,7 +73,7 @@ A run file wires requests together, including sequential steps, parallel groups,
 
 ### Pause and resume for real inspection
 
-`httpi` is not just about success/failure. It is also about controlled execution. A run can stop at a meaningful checkpoint, persist its state, let a human or agent inspect the artifacts, and continue later.
+`runmark` is not just about success/failure. It is also about controlled execution. A run can stop at a meaningful checkpoint, persist its state, let a human or agent inspect the artifacts, and continue later.
 
 ### Human and AI parity
 
@@ -81,19 +81,19 @@ The CLI and MCP surfaces should expose the same definitions, the same session mo
 
 ### Compared with GUI-first API clients
 
-`httpi` is not trying to be a Postman-style desktop workspace inside your repository. It is optimized for a narrower but very practical workflow: versioned request intent, explicit orchestration, local runtime artifacts, and agent-friendly inspection.
+`runmark` is not trying to be a Postman-style desktop workspace inside your repository. It is optimized for a narrower but very practical workflow: versioned request intent, explicit orchestration, local runtime artifacts, and agent-friendly inspection.
 
-| Concern | GUI-first API client | `httpi` |
+| Concern | GUI-first API client | `runmark` |
 | ------- | -------------------- | ------- |
 | Source of truth | local collection or synced workspace | tracked files in the repo |
-| Runtime state | hidden inside the client or cloud workspace | explicit under `httpi/artifacts/` |
+| Runtime state | hidden inside the client or cloud workspace | explicit under `runmark/artifacts/` |
 | Pause and resume | usually manual and ad hoc | explicit run step and resumable session |
 | AI-agent inspection | depends on the client session | same workflow through CLI and MCP |
 | Reviewability | export or screenshot after the fact | diff the request and run files directly |
 
 ### Where it fits best right now
 
-`httpi` is a strong fit when:
+`runmark` is a strong fit when:
 
 - API validation belongs in the same repository as the code under test
 - a human or coding agent needs to inspect artifacts before a mutating step continues
@@ -109,7 +109,7 @@ The first useful experience should stay small.
 A developer should be able to initialize a project, add one env file, one request file, and one run file, then validate and execute that flow within a few minutes.
 
 ```text
-httpi/
+runmark/
 ├── config.yaml
 ├── env/
 │   └── dev.env.yaml
@@ -135,12 +135,12 @@ In practice, the first useful workflow should include:
 
 | Concept         | What it means                                                         |
 | --------------- | --------------------------------------------------------------------- |
-| **Project**     | A repository that contains tracked `httpi/` definitions               |
+| **Project**     | A repository that contains tracked `runmark/` definitions               |
 | **Environment** | Non-secret values for a named context like `dev` or `staging`         |
 | **Request**     | One HTTP interaction                                                  |
 | **Run**         | A multi-step workflow composed of request, parallel, and pause steps  |
 | **Session**     | The persisted runtime record of one run execution                     |
-| **Artifacts**   | Captured request records, responses, and bodies written under `httpi/artifacts/` |
+| **Artifacts**   | Captured request records, responses, and bodies written under `runmark/artifacts/` |
 
 ## 8. Golden-path workflow
 
@@ -159,7 +159,7 @@ The important part is not just “send a request.” It is “run an inspectable
 
 ## 9. Example workflow shape
 
-The key workflow `httpi` is built to support looks like this:
+The key workflow `runmark` is built to support looks like this:
 
 1. authenticate
 2. extract a token or ID from the login response
@@ -204,13 +204,13 @@ The initial version is intentionally focused.
 
 ### 0.3.x stability note
 
-`httpi` is still pre-1.0, but the current 0.3.x line is intended to keep the core tracked file model, CLI/MCP workflow, example-first reference set, and pause/resume inspection flow recognizable and stable while adoption and hardening work continues.
+`runmark` is still pre-1.0, but the current 0.3.x line is intended to keep the core tracked file model, CLI/MCP workflow, example-first reference set, and pause/resume inspection flow recognizable and stable while adoption and hardening work continues.
 
 User-visible changes inside that line are tracked in [`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## 12. Open-source posture
 
-`httpi` is being set up as an open-source Exit Zero Labs project.
+`runmark` is being set up as an open-source Exit Zero Labs project.
 
 That means the repo should optimize for:
 
@@ -225,7 +225,7 @@ The near-term implementation priorities for that open-source posture live in [`d
 
 ## 13. What success looks like
 
-`httpi` is successful when:
+`runmark` is successful when:
 
 1. a developer can define and run a small API flow quickly
 2. an AI agent can discover the same files and reason about the same outcomes

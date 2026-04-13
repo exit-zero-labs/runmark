@@ -11,8 +11,8 @@ import {
 } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 
-export const trackedDirectoryName = "httpi";
-export const runtimeDirectoryName = "httpi/artifacts";
+export const trackedDirectoryName = "runmark";
+export const runtimeDirectoryName = "runmark/artifacts";
 export const requestFileSuffix = ".request.yaml";
 export const runFileSuffix = ".run.yaml";
 export const envFileSuffix = ".env.yaml";
@@ -30,7 +30,7 @@ export const exitCodes = {
   internalError: 4,
 } as const;
 
-export class HttpiError extends Error {
+export class RunmarkError extends Error {
   readonly code: string;
   readonly exitCode: number;
   readonly details?: unknown;
@@ -47,15 +47,15 @@ export class HttpiError extends Error {
     super(message, {
       cause: options?.cause instanceof Error ? options.cause : undefined,
     });
-    this.name = "HttpiError";
+    this.name = "RunmarkError";
     this.code = code;
     this.exitCode = options?.exitCode ?? exitCodes.internalError;
     this.details = options?.details;
   }
 }
 
-export function isHttpiError(error: unknown): error is HttpiError {
-  return error instanceof HttpiError;
+export function isRunmarkError(error: unknown): error is RunmarkError {
+  return error instanceof RunmarkError;
 }
 
 export function assert(
@@ -65,7 +65,7 @@ export function assert(
   exitCode = exitCodes.internalError,
 ): asserts condition {
   if (!condition) {
-    throw new HttpiError(code, message, { exitCode });
+    throw new RunmarkError(code, message, { exitCode });
   }
 }
 
@@ -95,7 +95,7 @@ export function relativeId(
 ): string {
   const relativePath = toPosixPath(relative(baseDir, filePath));
   if (!relativePath.endsWith(suffix)) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "INVALID_DEFINITION_PATH",
       `Expected ${filePath} to end with ${suffix}.`,
     );
@@ -129,7 +129,7 @@ export function sha256Hex(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
-const missingProcessEnvSentinel = "\0HTTPI_MISSING_PROCESS_ENV\0";
+const missingProcessEnvSentinel = "\0RUNMARK_MISSING_PROCESS_ENV\0";
 
 export function hashProcessEnvValue(value: string | undefined): string {
   return sha256Hex(value ?? missingProcessEnvSentinel);
@@ -483,7 +483,7 @@ export function assertPathWithin(
     return;
   }
 
-  throw new HttpiError(options.code, options.message, {
+  throw new RunmarkError(options.code, options.message, {
     exitCode: options.exitCode ?? exitCodes.validationFailure,
     details: {
       rootDir: resolvedRootDir,

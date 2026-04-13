@@ -1,9 +1,9 @@
 import type {
   CompiledRequestStep,
   SessionRecord,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendSessionEvent } from "@exit-zero-labs/httpi-runtime";
-import { toIsoTimestamp } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendSessionEvent } from "@exit-zero-labs/runmark-runtime";
+import { toIsoTimestamp } from "@exit-zero-labs/runmark-shared";
 import { evaluateAggregateAssertions } from "./assertions.js";
 import { summarizeIterations } from "./percentiles.js";
 import { executeRequestStepWithRetry } from "./retry-execution.js";

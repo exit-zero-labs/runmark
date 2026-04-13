@@ -2,7 +2,7 @@
 
 # Code of Conduct
 
-`httpi` aims to be a respectful, constructive, and inclusive open-source project.
+`runmark` aims to be a respectful, constructive, and inclusive open-source project.
 
 ## Expected behavior
 
@@ -20,7 +20,7 @@
 
 ## Scope
 
-This code of conduct applies to project discussions, issues, pull requests, reviews, and other community spaces connected to `httpi`.
+This code of conduct applies to project discussions, issues, pull requests, reviews, and other community spaces connected to `runmark`.
 
 ## Enforcement
 

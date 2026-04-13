@@ -4,8 +4,8 @@ import type {
   EnvironmentDefinition,
   HeaderBlockDefinition,
   ProjectConfig,
-} from "@exit-zero-labs/httpi-contracts";
-import { asRecord } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { asRecord } from "@exit-zero-labs/runmark-shared";
 import {
   expectRecord,
   normalizeCapturePolicy,

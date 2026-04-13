@@ -2,7 +2,7 @@
 
 # Pause and resume
 
-This is the canonical full workflow example for `httpi`. It shows:
+This is the canonical full workflow example for `runmark`. It shows:
 
 - a login request that extracts a secret token
 - parallel read steps that consume the extracted value
@@ -11,8 +11,8 @@ This is the canonical full workflow example for `httpi`. It shows:
 
 ## Setup
 
-1. edit `httpi/env/dev.env.yaml` so `baseUrl` points at your service or mock server
-2. create `httpi/artifacts/secrets.yaml` with your local `devPassword`
+1. edit `runmark/env/dev.env.yaml` so `baseUrl` points at your service or mock server
+2. create `runmark/artifacts/secrets.yaml` with your local `devPassword`
 
 ```yaml
 devPassword: swordfish
@@ -21,14 +21,14 @@ devPassword: swordfish
 ## Run it
 
 ```bash
-httpi validate --project-root examples/pause-resume
-httpi describe --run smoke --project-root examples/pause-resume
-httpi run --run smoke --project-root examples/pause-resume
-httpi session show <sessionId> --project-root examples/pause-resume
-httpi artifacts list <sessionId> --project-root examples/pause-resume
-httpi resume <sessionId> --project-root examples/pause-resume
+runmark validate --project-root examples/pause-resume
+runmark describe --run smoke --project-root examples/pause-resume
+runmark run --run smoke --project-root examples/pause-resume
+runmark session show <sessionId> --project-root examples/pause-resume
+runmark artifacts list <sessionId> --project-root examples/pause-resume
+runmark resume <sessionId> --project-root examples/pause-resume
 ```
 
 The automated suites use this example as the canonical pause/resume flow, so it stays aligned with real CLI and MCP behavior.
 
-The checked-in `httpi/artifacts/` files are `.gitkeep` placeholders so the runtime layout is visible in the repository without checking in real runtime values.
+The checked-in `runmark/artifacts/` files are `.gitkeep` placeholders so the runtime layout is visible in the repository without checking in real runtime values.

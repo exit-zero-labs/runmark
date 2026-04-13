@@ -1,24 +1,24 @@
 import { lstat, realpath } from "node:fs/promises";
 import { basename, resolve } from "node:path";
-import { ensureRuntimePaths } from "@exit-zero-labs/httpi-runtime";
+import { ensureRuntimePaths } from "@exit-zero-labs/runmark-runtime";
 import {
   assertPathWithin,
   ensureDir,
   exitCodes,
-  HttpiError,
+  RunmarkError,
   readUtf8File,
   resolveFromRoot,
   runtimeDirectoryName,
   trackedDirectoryName,
   writeUtf8File,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import type { InitProjectResult } from "./types.js";
 
 const schemaBaseUrl =
-  "https://raw.githubusercontent.com/exit-zero-labs/httpi/main/packages/contracts/schemas";
+  "https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas";
 const runtimeGitignoreSentinel = `${runtimeDirectoryName}/*`;
 const runtimeGitignoreBlockLines = [
-  "# httpi runtime state",
+  "# runmark runtime state",
   runtimeGitignoreSentinel,
   `!${runtimeDirectoryName}/.gitkeep`,
   `!${runtimeDirectoryName}/history/`,
@@ -50,37 +50,37 @@ export async function initProject(
   await ensureProjectOwnedDirectory(
     rootDir,
     trackedRoot,
-    "The tracked httpi directory",
+    "The tracked runmark directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "env"),
-    "The tracked httpi/env directory",
+    "The tracked runmark/env directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "requests"),
-    "The tracked httpi/requests directory",
+    "The tracked runmark/requests directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "runs"),
-    "The tracked httpi/runs directory",
+    "The tracked runmark/runs directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "blocks", "headers"),
-    "The tracked httpi/blocks/headers directory",
+    "The tracked runmark/blocks/headers directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "blocks", "auth"),
-    "The tracked httpi/blocks/auth directory",
+    "The tracked runmark/blocks/auth directory",
   );
   await ensureProjectOwnedDirectory(
     rootDir,
     resolveFromRoot(trackedRoot, "bodies"),
-    "The tracked httpi/bodies directory",
+    "The tracked runmark/bodies directory",
   );
   await ensureRuntimePaths(rootDir);
   createdPaths.push(
@@ -108,7 +108,7 @@ export async function initProject(
       [
         schemaComment("config.schema.json"),
         "schemaVersion: 1",
-        `project: ${JSON.stringify(basename(rootDir) || "httpi-project")}`,
+        `project: ${JSON.stringify(basename(rootDir) || "runmark-project")}`,
         "defaultEnv: dev",
         "",
         "defaults:",
@@ -226,7 +226,7 @@ async function ensureProjectOwnedDirectory(
 
   const stats = await lstat(directoryPath);
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       {
@@ -235,7 +235,7 @@ async function ensureProjectOwnedDirectory(
     );
   }
   if (!stats.isDirectory()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must be a directory.`,
       {
@@ -268,7 +268,7 @@ async function ensureProjectOwnedFileIfExists(
     return false;
   }
   if (stats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "PROJECT_PATH_INVALID",
       `${message} must not resolve through a symlink.`,
       {
@@ -277,7 +277,7 @@ async function ensureProjectOwnedFileIfExists(
     );
   }
   if (!stats.isFile()) {
-    throw new HttpiError("PROJECT_PATH_INVALID", `${message} must be a file.`, {
+    throw new RunmarkError("PROJECT_PATH_INVALID", `${message} must be a file.`, {
       exitCode: exitCodes.validationFailure,
     });
   }

@@ -13,30 +13,30 @@ import type {
   RequestArtifactError,
   SessionRecord,
   StepArtifactSummary,
-} from "@exit-zero-labs/httpi-contracts";
-import { isDiagnostic } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { isDiagnostic } from "@exit-zero-labs/runmark-contracts";
 import {
   enrichDiagnosticsFromFiles,
   finalizeDiagnostic,
-} from "@exit-zero-labs/httpi-definitions";
+} from "@exit-zero-labs/runmark-definitions";
 import {
   executeHttpRequest,
   isHttpExecutionError,
-} from "@exit-zero-labs/httpi-http";
+} from "@exit-zero-labs/runmark-http";
 import {
   appendSessionEvent,
   isSessionCancelled,
   redactArtifactText,
   writeSession,
-} from "@exit-zero-labs/httpi-runtime";
+} from "@exit-zero-labs/runmark-runtime";
 import {
   coerceErrorMessage,
   exitCodes,
-  HttpiError,
-  isHttpiError,
+  RunmarkError,
+  isRunmarkError,
   redactJsonValue,
   toIsoTimestamp,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { evaluateAssertions, evaluateSchemaAssertions } from "./assertions.js";
 import { getSessionStepRecord } from "./project-context.js";
 import { maybeWriteRequestArtifacts } from "./request-artifacts.js";
@@ -341,7 +341,7 @@ export async function executeRequestStep(
 async function resolveExecutionDiagnostics(
   error: unknown,
 ): Promise<EnrichedDiagnostic[]> {
-  if (!isHttpiError(error) || !Array.isArray(error.details)) {
+  if (!isRunmarkError(error) || !Array.isArray(error.details)) {
     return [];
   }
 
@@ -404,7 +404,7 @@ async function assertExpectations(
       ? `Assertion failed: ${first.path} ${first.matcher} expected ${JSON.stringify(first.expected)} but got ${JSON.stringify(first.actual)}.`
       : `${failures.length} assertions failed. First: ${first.path} ${first.matcher} expected ${JSON.stringify(first.expected)} but got ${JSON.stringify(first.actual)}.`;
 
-  throw new HttpiError("EXPECTATION_FAILED", message, {
+  throw new RunmarkError("EXPECTATION_FAILED", message, {
     exitCode: exitCodes.executionFailure,
     details: failures.map((f) => ({
       level: "error" as const,
@@ -435,7 +435,7 @@ function resolveFailureCapture(
 function createRequestArtifactError(error: unknown): RequestArtifactError {
   return {
     message: coerceErrorMessage(error),
-    ...(error instanceof HttpiError ? { code: error.code } : {}),
+    ...(error instanceof RunmarkError ? { code: error.code } : {}),
     ...(error instanceof Error ? { class: error.name } : {}),
   };
 }

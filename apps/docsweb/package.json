@@ -1,9 +1,9 @@
 {
-  "name": "@exit-zero-labs/httpi-docsweb",
+  "name": "@exit-zero-labs/runmark-docsweb",
   "private": true,
   "type": "module",
   "version": "0.3.0",
-  "description": "Starlight docs site for httpi.",
+  "description": "Starlight docs site for Runmark.",
   "license": "MIT",
   "author": "Exit Zero Labs LLC",
   "engines": {
@@ -11,10 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/exit-zero-labs/httpi.git",
+    "url": "https://github.com/exit-zero-labs/runmark.git",
     "directory": "apps/docsweb"
   },
-  "homepage": "https://httpi.exitzerolabs.com",
+  "homepage": "https://runmark.exitzerolabs.com",
   "scripts": {
     "sync:content": "node ./scripts/sync-content.mjs",
     "predev": "pnpm run sync:content",

@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# httpi - Archived Architecture Draft (v0)
+# runmark - Archived Architecture Draft (v0)
 
 **Status**: Archived draft  
 **Date**: 2026-04-11  
@@ -8,14 +8,14 @@
 
 ---
 
-This document preserves the first full architecture pass for `httpi`.
+This document preserves the first full architecture pass for `runmark`.
 
 - For the current user-facing overview, see [`product.md`](product.md).
 - For the current technical source of truth, see [`architecture.md`](architecture.md).
 
 ## 1. Purpose
 
-`httpi` is a file-based HTTP client, CLI, and MCP project for defining, running, pausing, resuming, and inspecting HTTP request workflows from a Git-tracked repo.
+`runmark` is a file-based HTTP client, CLI, and MCP project for defining, running, pausing, resuming, and inspecting HTTP request workflows from a Git-tracked repo.
 
 This v0 architecture is intentionally narrow:
 
@@ -40,9 +40,9 @@ v0 is successful if it delivers the following outcomes.
 
 Most users should only need:
 
-- `httpi/env/`
-- `httpi/requests/`
-- `httpi/runs/`
+- `runmark/env/`
+- `runmark/requests/`
+- `runmark/runs/`
 
 Everything else is optional power-user or reuse-oriented structure.
 
@@ -50,7 +50,7 @@ Everything else is optional power-user or reuse-oriented structure.
 
 1. **Request-first authoring**: request files are the main unit humans and AI agents read and write.
 2. **Runs own orchestration**: sequencing, parallelism, and pause points live in run files, not in separate orchestration concepts.
-3. **Tracked intent, untracked runtime**: `httpi/` defines behavior; `httpi/artifacts/` stores local artifacts, sessions, and secrets.
+3. **Tracked intent, untracked runtime**: `runmark/` defines behavior; `runmark/artifacts/` stores local artifacts, sessions, and secrets.
 4. **Optional reuse, not mandatory ceremony**: reusable header/auth blocks and body files exist, but simple requests stay simple.
 5. **Strict typing at every boundary**: files, compiled runtime models, events, artifacts, and interface payloads all have runtime schemas and TypeScript types.
 6. **One engine, many interfaces**: CLI and MCP are adapters over the same execution core.
@@ -65,7 +65,7 @@ Everything else is optional power-user or reuse-oriented structure.
 The golden-path project can start with only four tracked files:
 
 ```text
-httpi/
+runmark/
 ├── config.yaml
 ├── env/
 │   └── dev.env.yaml
@@ -77,15 +77,15 @@ httpi/
 
 Expected flow:
 
-1. `httpi init`
-2. `httpi validate`
-3. `httpi run --run smoke --env dev`
+1. `runmark init`
+2. `runmark validate`
+3. `runmark run --run smoke --env dev`
 
-This path should work without creating `blocks/`, `bodies/`, or `httpi/artifacts/secrets.yaml`.
+This path should work without creating `blocks/`, `bodies/`, or `runmark/artifacts/secrets.yaml`.
 
 Minimal worked example:
 
-`httpi/env/dev.env.yaml`
+`runmark/env/dev.env.yaml`
 
 ```yaml
 schemaVersion: 1
@@ -93,7 +93,7 @@ values:
   baseUrl: http://localhost:3000
 ```
 
-`httpi/requests/ping.request.yaml`
+`runmark/requests/ping.request.yaml`
 
 ```yaml
 kind: request
@@ -104,7 +104,7 @@ expect:
   status: 200
 ```
 
-`httpi/runs/smoke.run.yaml`
+`runmark/runs/smoke.run.yaml`
 
 ```yaml
 kind: run
@@ -130,22 +130,22 @@ v0 must treat this as a first-class scenario, not an edge case.
 
 Full worked-example file set:
 
-- `httpi/requests/auth/login.request.yaml`
-- `httpi/requests/users/get-user.request.yaml`
-- `httpi/requests/orders/list-orders.request.yaml`
-- `httpi/requests/users/update-user.request.yaml`
-- `httpi/runs/user-debug.run.yaml`
+- `runmark/requests/auth/login.request.yaml`
+- `runmark/requests/users/get-user.request.yaml`
+- `runmark/requests/orders/list-orders.request.yaml`
+- `runmark/requests/users/update-user.request.yaml`
+- `runmark/runs/user-debug.run.yaml`
 
 Expected lifecycle:
 
 1. `login` extracts an auth token
 2. `get-user` and `list-orders` run in parallel using `{{steps.login.authToken}}`
 3. `inspect-after-fetch` pauses and persists the session
-4. `httpi resume <sessionId>` continues with `update-user` using the same compiled snapshot
+4. `runmark resume <sessionId>` continues with `update-user` using the same compiled snapshot
 
 ### 4.3 Failed validation after code changes
 
-When a user or AI agent changes the API under test, `httpi` should make it easy to:
+When a user or AI agent changes the API under test, `runmark` should make it easy to:
 
 1. run the same flow again
 2. inspect previous artifacts
@@ -171,7 +171,7 @@ An AI agent should be able to:
 - reusable header and auth blocks
 - run files with `request`, `parallel`, and `pause` step kinds
 - persisted sessions for pause/resume
-- deterministic artifact capture in `httpi/artifacts/`
+- deterministic artifact capture in `runmark/artifacts/`
 - one CLI app and one MCP app over shared packages
 - test fixtures and agent-validation docs under `testing/`
 - runtime validation schemas for definitions, sessions, artifacts, events, and interface payloads
@@ -211,13 +211,13 @@ An AI agent should be able to:
                  │                                 │
                  ▼                                 ▼
         tracked project files              untracked runtime state
-              `httpi/`                          `httpi/artifacts/`
+              `runmark/`                          `runmark/artifacts/`
 ```
 
 Core idea:
 
-- `httpi/` is the tracked source of truth
-- `httpi/artifacts/` is the local execution surface
+- `runmark/` is the tracked source of truth
+- `runmark/artifacts/` is the local execution surface
 - the engine compiles definitions into an execution snapshot
 - CLI and MCP expose the same lifecycle, result, and artifact model
 
@@ -242,7 +242,7 @@ The repository is already scaffolded as a pnpm turborepo. v0 should keep the pac
 - `packages/contracts` defines only public payloads that cross package or interface boundaries
 - `packages/execution` may depend on `definitions`, `http`, `runtime`, `contracts`, and `shared`
 - `packages/http` must not know about CLI or MCP concerns
-- `packages/runtime` owns on-disk formats and locking rules for `httpi/artifacts/`
+- `packages/runtime` owns on-disk formats and locking rules for `runmark/artifacts/`
 - `packages/shared` is a leaf-only utility package; domain logic must not accumulate there
 
 ### 7.1 Package ownership matrix
@@ -274,7 +274,7 @@ The repository is already scaffolded as a pnpm turborepo. v0 should keep the pac
 
 ```text
 repo/
-├── httpi/
+├── runmark/
 │   ├── config.yaml
 │   ├── env/
 │   │   └── dev.env.yaml
@@ -284,12 +284,12 @@ repo/
 │   ├── bodies/
 │   ├── requests/
 │   └── runs/
-├── httpi/artifacts/
+├── runmark/artifacts/
 │   ├── history/
 │   ├── sessions/
 │   └── secrets.yaml
 └── testing/
-    └── httpi/
+    └── runmark/
         ├── fixtures/
         ├── flows/
         └── judge/
@@ -299,16 +299,16 @@ repo/
 
 | Path                               | Purpose                                            |
 | ---------------------------------- | -------------------------------------------------- |
-| `httpi/config.yaml`                | Project defaults, capture policy, redaction policy |
-| `httpi/env/*.env.yaml`             | Named environment values                           |
-| `httpi/blocks/headers/**/*.yaml`   | Reusable header blocks                             |
-| `httpi/blocks/auth/**/*.yaml`      | Reusable auth blocks                               |
-| `httpi/bodies/**`                  | Reusable body payload files                        |
-| `httpi/requests/**/*.request.yaml` | Atomic request definitions                         |
-| `httpi/runs/**/*.run.yaml`         | Execution plans                                    |
-| `httpi/artifacts/secrets.yaml`              | Local secret aliases, Git-ignored                  |
-| `httpi/artifacts/sessions/*.json`           | Persisted session snapshots                        |
-| `httpi/artifacts/history/<sessionId>/...` | Captured runtime artifacts                         |
+| `runmark/config.yaml`                | Project defaults, capture policy, redaction policy |
+| `runmark/env/*.env.yaml`             | Named environment values                           |
+| `runmark/blocks/headers/**/*.yaml`   | Reusable header blocks                             |
+| `runmark/blocks/auth/**/*.yaml`      | Reusable auth blocks                               |
+| `runmark/bodies/**`                  | Reusable body payload files                        |
+| `runmark/requests/**/*.request.yaml` | Atomic request definitions                         |
+| `runmark/runs/**/*.run.yaml`         | Execution plans                                    |
+| `runmark/artifacts/secrets.yaml`              | Local secret aliases, Git-ignored                  |
+| `runmark/artifacts/sessions/*.json`           | Persisted session snapshots                        |
+| `runmark/artifacts/history/<sessionId>/...` | Captured runtime artifacts                         |
 
 Only `config.yaml`, `env/`, `requests/`, and `runs/` are required in the minimal v0 project. `blocks/` and `bodies/` are optional and only exist when the project needs reuse.
 
@@ -318,20 +318,20 @@ All tracked YAML formats and runtime JSON/JSONL artifacts must carry an explicit
 
 Canonical identity is always derived from file paths, not from a field inside the file.
 
-- request ID = path under `httpi/requests/` without `.request.yaml`
-- run ID = path under `httpi/runs/` without `.run.yaml`
-- env ID = path under `httpi/env/` without `.env.yaml`
-- header block ID = path under `httpi/blocks/headers/` without `.yaml`
-- auth block ID = path under `httpi/blocks/auth/` without `.yaml`
+- request ID = path under `runmark/requests/` without `.request.yaml`
+- run ID = path under `runmark/runs/` without `.run.yaml`
+- env ID = path under `runmark/env/` without `.env.yaml`
+- header block ID = path under `runmark/blocks/headers/` without `.yaml`
+- auth block ID = path under `runmark/blocks/auth/` without `.yaml`
 
 Tracked definition files may include optional `title`, but not `name` as an identity field.
 
 Examples:
 
-- `httpi/requests/users/get-user.request.yaml` -> `users/get-user`
-- `httpi/runs/smoke.run.yaml` -> `smoke`
-- `httpi/env/dev.env.yaml` -> `dev`
-- `httpi/blocks/headers/common/json-defaults.yaml` -> `common/json-defaults`
+- `runmark/requests/users/get-user.request.yaml` -> `users/get-user`
+- `runmark/runs/smoke.run.yaml` -> `smoke`
+- `runmark/env/dev.env.yaml` -> `dev`
+- `runmark/blocks/headers/common/json-defaults.yaml` -> `common/json-defaults`
 
 Reference rules:
 
@@ -342,20 +342,20 @@ Reference rules:
 
 ### 8.4 Scaffold rules
 
-`httpi init` must:
+`runmark init` must:
 
-1. create `httpi/config.yaml`
-2. create `httpi/env/`, `httpi/requests/`, and `httpi/runs/`
-3. add `httpi/artifacts/` to `.gitignore`
+1. create `runmark/config.yaml`
+2. create `runmark/env/`, `runmark/requests/`, and `runmark/runs/`
+3. add `runmark/artifacts/` to `.gitignore`
 4. avoid creating optional directories unless the user asks for examples
 
-`httpi init --example` may create blocks, bodies, and sample flows.
+`runmark init --example` may create blocks, bodies, and sample flows.
 
 ## 9. Core Data Model
 
 ### 9.1 Project config
 
-`httpi/config.yaml` defines project-level defaults and safety policies.
+`runmark/config.yaml` defines project-level defaults and safety policies.
 
 Example:
 
@@ -401,7 +401,7 @@ values:
 
 ### 9.3 Secrets file
 
-`httpi/artifacts/secrets.yaml` is optional and local-only.
+`runmark/artifacts/secrets.yaml` is optional and local-only.
 
 Example:
 
@@ -417,8 +417,8 @@ aliases:
 Rules:
 
 - tracked files must not contain secret literals
-- literal local secrets are allowed only in `httpi/artifacts/secrets.yaml`
-- `httpi/artifacts/secrets.yaml` must be owner-readable only where the OS supports it
+- literal local secrets are allowed only in `runmark/artifacts/secrets.yaml`
+- `runmark/artifacts/secrets.yaml` must be owner-readable only where the OS supports it
 - tracked files may reference secrets via `{{secrets.<alias>}}` or direct `$ENV:NAME`
 
 ### 9.4 Reusable blocks
@@ -508,7 +508,7 @@ Request rules:
 - a request defines one HTTP interaction
 - `title` is optional; identity comes from file path
 - a request may use reusable blocks and still define inline headers/auth/body
-- body files are resolved relative to `httpi/bodies/`
+- body files are resolved relative to `runmark/bodies/`
 - request definitions are pure data; v0 does not support embedded scripts
 
 #### Merge and precedence rules
@@ -598,7 +598,7 @@ Step kinds in v0:
 Run rules:
 
 - run IDs come from file paths
-- request steps reference request IDs under `httpi/requests/`
+- request steps reference request IDs under `runmark/requests/`
 - `with` values are step-local overrides merged into the flat request variable namespace
 - `parallel` child steps run concurrently and join before the parent group completes
 - `pause` persists session state and exits cleanly
@@ -634,7 +634,7 @@ Frozen at run start:
 Late-bound at step attempt time:
 
 - direct `$ENV:NAME` reads
-- `httpi/artifacts/secrets.yaml` alias resolution
+- `runmark/artifacts/secrets.yaml` alias resolution
 
 This means resume uses the original compiled snapshot for project data, but still resolves secrets at the moment a not-yet-started step executes.
 
@@ -675,7 +675,7 @@ Example:
 }
 ```
 
-Sessions are stored in `httpi/artifacts/sessions/<sessionId>.json`.
+Sessions are stored in `runmark/artifacts/sessions/<sessionId>.json`.
 
 ### 10.3 Session state machine
 
@@ -762,7 +762,7 @@ Authoritative precedence summary:
 v0 supports two runtime-only secret sources:
 
 1. direct `$ENV:NAME` references
-2. `httpi/artifacts/secrets.yaml` aliases referenced as `{{secrets.aliasName}}`
+2. `runmark/artifacts/secrets.yaml` aliases referenced as `{{secrets.aliasName}}`
 
 Secret rules:
 
@@ -774,14 +774,14 @@ Secret rules:
 
 ### 11.1 Project discovery
 
-The engine can discover a project by searching upward from the current working directory for `httpi/config.yaml`.
+The engine can discover a project by searching upward from the current working directory for `runmark/config.yaml`.
 
 Discovery rules:
 
-- nearest matching `httpi/config.yaml` wins
+- nearest matching `runmark/config.yaml` wins
 - search stops at the Git repository root
 - CLI may rely on cwd-based discovery; MCP tool calls require an explicit `projectRoot`
-- if no project is found, return a clear error instructing the user to run `httpi init`
+- if no project is found, return a clear error instructing the user to run `runmark init`
 
 ### 11.2 Validation
 
@@ -887,10 +887,10 @@ Rules:
 
 ### 12.1 Artifact layout
 
-Every executed session writes artifacts under `httpi/artifacts/history/<sessionId>/`.
+Every executed session writes artifacts under `runmark/artifacts/history/<sessionId>/`.
 
 ```text
-httpi/artifacts/history/<sessionId>/
+runmark/artifacts/history/<sessionId>/
 ├── manifest.json
 ├── events.jsonl
 └── steps/
@@ -954,17 +954,17 @@ Initial command surface:
 
 | Command                            | Purpose                                                 |
 | ---------------------------------- | ------------------------------------------------------- | ---- | --------- | ----------------------------------------- |
-| `httpi init`                       | Scaffold required tracked files and update `.gitignore` |
-| `httpi list requests\|runs\|envs\|sessions` | Discover project definitions and sessions |
-| `httpi validate`                   | Validate definitions and references                     |
-| `httpi describe --request <id>`    | Show the resolved definition shape without executing    |
-| `httpi describe --run <id>`        | Show compiled run structure and step order              |
-| `httpi run --request <id>`         | Execute a single request                                |
-| `httpi run --run <id>`             | Execute a run                                           |
-| `httpi resume <sessionId>`         | Resume a paused or failed session                       |
-| `httpi session show <sessionId>`   | Show session state, drift info, and next step           |
-| `httpi artifacts list <sessionId>` | List artifact paths                                     |
-| `httpi explain variables ...`      | Show variable provenance and effective values           |
+| `runmark init`                       | Scaffold required tracked files and update `.gitignore` |
+| `runmark list requests\|runs\|envs\|sessions` | Discover project definitions and sessions |
+| `runmark validate`                   | Validate definitions and references                     |
+| `runmark describe --request <id>`    | Show the resolved definition shape without executing    |
+| `runmark describe --run <id>`        | Show compiled run structure and step order              |
+| `runmark run --request <id>`         | Execute a single request                                |
+| `runmark run --run <id>`             | Execute a run                                           |
+| `runmark resume <sessionId>`         | Resume a paused or failed session                       |
+| `runmark session show <sessionId>`   | Show session state, drift info, and next step           |
+| `runmark artifacts list <sessionId>` | List artifact paths                                     |
+| `runmark explain variables ...`      | Show variable provenance and effective values           |
 
 Required CLI UX:
 
@@ -1006,13 +1006,13 @@ The same engine must back both interfaces.
 
 | Capability          | CLI                      | MCP                                | Shared contract            |
 | ------------------- | ------------------------ | ---------------------------------- | -------------------------- |
-| list definitions    | `httpi list ...`         | `list_definitions`                 | same IDs and metadata      |
-| validate project    | `httpi validate`         | `validate_project`                 | same diagnostics schema    |
-| describe before run | `httpi describe ...`     | `describe_request`, `describe_run` | same compiled model fields |
-| execute             | `httpi run ...`          | `run_definition`                   | same session/result schema |
-| resume              | `httpi resume ...`       | `resume_session`                   | same drift and lock rules  |
-| inspect session     | `httpi session show ...` | `get_session_state`                | same state machine         |
-| inspect artifacts   | `httpi artifacts ...`    | `list_artifacts`, `read_artifact`  | same redaction policy      |
+| list definitions    | `runmark list ...`         | `list_definitions`                 | same IDs and metadata      |
+| validate project    | `runmark validate`         | `validate_project`                 | same diagnostics schema    |
+| describe before run | `runmark describe ...`     | `describe_request`, `describe_run` | same compiled model fields |
+| execute             | `runmark run ...`          | `run_definition`                   | same session/result schema |
+| resume              | `runmark resume ...`       | `resume_session`                   | same drift and lock rules  |
+| inspect session     | `runmark session show ...` | `get_session_state`                | same state machine         |
+| inspect artifacts   | `runmark artifacts ...`    | `list_artifacts`, `read_artifact`  | same redaction policy      |
 
 ## 14. Security, Reliability, and Observability
 
@@ -1022,11 +1022,11 @@ Security-sensitive behavior is part of v0, not later hardening.
 
 Rules:
 
-- `httpi/artifacts/` must be Git-ignored
-- `httpi init` must add `httpi/artifacts/` to `.gitignore`
-- `httpi validate` and runtime execution should warn or fail if `httpi/artifacts/` is not ignored
+- `runmark/artifacts/` must be Git-ignored
+- `runmark init` must add `runmark/artifacts/` to `.gitignore`
+- `runmark validate` and runtime execution should warn or fail if `runmark/artifacts/` is not ignored
 - tracked files must not contain secret literals in known secret-bearing fields
-- `httpi/artifacts/secrets.yaml`, session files, and artifacts should be owner-readable only when supported
+- `runmark/artifacts/secrets.yaml`, session files, and artifacts should be owner-readable only when supported
 - redaction must cover request headers, response headers, extraction results, known sensitive JSON paths, and error strings
 - MCP artifact reads must obey the same redaction and sensitivity policy as CLI output
 
@@ -1075,7 +1075,7 @@ The idea doc explicitly treats `testing/` as both a code-testing area and an age
 Recommended structure:
 
 ```text
-testing/httpi/
+testing/runmark/
 ├── fixtures/   # payloads, env files, sample definitions, golden artifacts
 ├── flows/      # canonical end-to-end request/run flows
 └── judge/      # pass/fail checklists for agent-driven validation
@@ -1112,7 +1112,7 @@ The first implementation steps should be explicit for a new contributor.
 5. **`packages/execution`**: compile run files, resolve variables, schedule sequential and parallel steps, and implement pause/resume
 6. **`apps/cli`**: implement `validate`, `describe`, `run`, `resume`, and session/artifact inspection
 7. **`apps/mcp`**: mirror the same execution and inspection surface for agents
-8. **`testing/httpi`**: add canonical fixtures, flows, mock-server coverage, and judge docs
+8. **`testing/runmark`**: add canonical fixtures, flows, mock-server coverage, and judge docs
 
 ## 17. Key Decisions
 
@@ -1139,13 +1139,13 @@ The first implementation steps should be explicit for a new contributor.
 
 ## 18. Summary
 
-The v0 architecture for `httpi` should stay sharp and boring in the best way:
+The v0 architecture for `runmark` should stay sharp and boring in the best way:
 
 - **requests** are the main executable unit
 - **runs** define order, parallelism, and pause points
 - **sessions** make execution resumable and inspectable
-- **`httpi/artifacts/`** stores local runtime state and artifacts
+- **`runmark/artifacts/`** stores local runtime state and artifacts
 - **CLI and MCP** share one typed engine and one runtime model
-- **testing/httpi/** holds both executable fixtures and judge-oriented validation assets
+- **testing/runmark/** holds both executable fixtures and judge-oriented validation assets
 
 That is enough to satisfy the idea doc while giving implementation a clearer contract for identity, safety, agent ergonomics, developer experience, and testability.

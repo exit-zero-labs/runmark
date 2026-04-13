@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/exit-zero-labs/httpi/main/packages/contracts/schemas/request.schema.json",
-  "title": "httpi request definition",
+  "$id": "https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas/request.schema.json",
+  "title": "runmark request definition",
   "type": "object",
   "additionalProperties": false,
   "required": ["kind", "method", "url"],

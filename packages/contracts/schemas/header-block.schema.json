@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/exit-zero-labs/httpi/main/packages/contracts/schemas/header-block.schema.json",
-  "title": "httpi header block",
+  "$id": "https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas/header-block.schema.json",
+  "title": "runmark header block",
   "type": "object",
   "additionalProperties": false,
   "required": ["headers"],

@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas/request.schema.json
+kind: request
+title: Ping
+method: GET
+url: "{{baseUrl}}/ping"
+uses:
+  headers:
+    - common/json
+expect:
+  status: 200

@@ -1,14 +1,14 @@
 import type {
   FlatVariableValue,
   VariableExplanation,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
 import {
   exitCodes,
-  HttpiError,
+  RunmarkError,
   interpolateTemplate,
   looksLikeSecretFieldName,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { uniqueSecretValues } from "./request-secrets.js";
 import type { RequestResolutionContext, ResolvedScalarValue } from "./types.js";
 
@@ -506,8 +506,8 @@ function buildResolutionError(
   message: string,
   diagnosticLocation: ResolutionDiagnosticLocation | undefined,
   hint: string,
-): HttpiError {
-  return new HttpiError(code, message, {
+): RunmarkError {
+  return new RunmarkError(code, message, {
     exitCode: exitCodes.validationFailure,
     ...(diagnosticLocation
       ? {

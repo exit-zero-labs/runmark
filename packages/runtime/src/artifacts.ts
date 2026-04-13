@@ -1,7 +1,7 @@
 /**
  * Runtime artifact persistence and inspection helpers.
  *
- * This module owns `httpi/artifacts/history/<sessionId>/`, including event logs,
+ * This module owns `runmark/artifacts/history/<sessionId>/`, including event logs,
  * manifests, step artifacts, and safe read-back of captured files.
  */
 import { chmod, lstat, readFile, realpath } from "node:fs/promises";
@@ -14,21 +14,21 @@ import type {
   SessionRecord,
   StepArtifactSummary,
   StreamChunkRecord,
-} from "@exit-zero-labs/httpi-contracts";
-import { schemaVersion } from "@exit-zero-labs/httpi-contracts";
+} from "@exit-zero-labs/runmark-contracts";
+import { schemaVersion } from "@exit-zero-labs/runmark-contracts";
 import {
   appendJsonLine,
   assertPathWithin,
   exitCodes,
   fileExists,
-  HttpiError,
+  RunmarkError,
   readJsonFile,
   redactText,
   resolveFromRoot,
   sanitizeFileSegment,
   writeFileAtomic,
   writeJsonFileAtomic,
-} from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-shared";
 import { withSerializedFileOperation } from "./file-operations.js";
 import {
   assertProjectOwnedFileIfExists,
@@ -102,7 +102,7 @@ export async function writeStepArtifacts(
     await ensureProjectOwnedDirectory(
       projectRoot,
       attemptDirectory,
-      `The local httpi/artifacts/history/${session.sessionId}/steps/${sanitizeFileSegment(
+      `The local runmark/artifacts/history/${session.sessionId}/steps/${sanitizeFileSegment(
         input.stepId,
       )}/attempt-${input.attempt} directory`,
     );
@@ -265,7 +265,7 @@ export async function writeStepArtifacts(
 
     // Binary response (A3): record a manifest entry with sha256/size/path but
     // do not inline the body. Path is stored verbatim; it may live outside
-    // httpi/artifacts/history when the user explicitly opts into a different saveTo.
+    // runmark/artifacts/history when the user explicitly opts into a different saveTo.
     if (input.binary) {
       manifest.entries.push({
         schemaVersion,
@@ -332,7 +332,7 @@ export async function readArtifact(
     (entry) => entry.relativePath === relativePath,
   );
   if (!manifestEntry) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ARTIFACT_NOT_FOUND",
       `Artifact ${relativePath} was not found for session ${sessionId}.`,
       { exitCode: exitCodes.validationFailure },
@@ -351,7 +351,7 @@ export async function readArtifact(
   });
   const artifactStats = await lstat(absolutePath);
   if (artifactStats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ARTIFACT_PATH_INVALID",
       `Artifact path ${relativePath} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
@@ -423,7 +423,7 @@ export async function readStreamChunks(
       entry.stepId === stepId && (entry.kind as string) === "stream.chunks",
   );
   if (matching.length === 0) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "STREAM_CHUNKS_NOT_FOUND",
       `No stream chunk artifacts were captured for step ${stepId} in session ${sessionId}.`,
       { exitCode: exitCodes.validationFailure },
@@ -446,7 +446,7 @@ export async function readStreamChunks(
   });
   const artifactStats = await lstat(absolutePath);
   if (artifactStats.isSymbolicLink()) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ARTIFACT_PATH_INVALID",
       `Artifact path ${entry.relativePath} must not resolve through a symlink.`,
       { exitCode: exitCodes.validationFailure },
@@ -498,7 +498,7 @@ async function ensureSessionArtifactRoot(
   await ensureProjectOwnedDirectory(
     projectRoot,
     sessionPaths.artifactRoot,
-    `The local httpi/artifacts/history/${session.sessionId} directory`,
+    `The local runmark/artifacts/history/${session.sessionId} directory`,
   );
   await chmod(sessionPaths.artifactRoot, runtimeDirectoryMode);
 }
@@ -530,7 +530,7 @@ async function readArtifactManifest(
     manifest.sessionId !== sessionId ||
     !Array.isArray(manifest.entries)
   ) {
-    throw new HttpiError(
+    throw new RunmarkError(
       "ARTIFACT_MANIFEST_INVALID",
       `Artifact manifest for session ${sessionId} is invalid.`,
       { exitCode: exitCodes.validationFailure },

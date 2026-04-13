@@ -3,9 +3,9 @@ import type {
   ProjectFiles,
   RunFile,
   RunStepDefinition,
-} from "@exit-zero-labs/httpi-contracts";
-import { appendDiagnosticPath } from "@exit-zero-labs/httpi-contracts";
-import { sanitizeFileSegment } from "@exit-zero-labs/httpi-shared";
+} from "@exit-zero-labs/runmark-contracts";
+import { appendDiagnosticPath } from "@exit-zero-labs/runmark-contracts";
+import { sanitizeFileSegment } from "@exit-zero-labs/runmark-shared";
 
 export function validateProjectReferences(project: ProjectFiles): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
