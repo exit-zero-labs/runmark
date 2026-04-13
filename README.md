@@ -134,7 +134,7 @@ These examples are maintained reference projects with automated coverage behind 
 
 ## MCP server
 
-`httpi mcp` starts a stdio MCP server that exposes the same project model as the CLI — same engine path, same redaction, same artifacts. Point any MCP client (Claude Desktop, Claude Code, Cursor, etc.) at the `httpi` bin with `mcp` as the first argument:
+`httpi mcp` starts a stdio MCP server that exposes the same execution engine as the CLI — same redaction, same artifacts, same runtime model. Point any MCP client (Claude Desktop, Claude Code, Cursor, etc.) at the `httpi` bin with `mcp` as the first argument:
 
 ```json
 {
@@ -159,6 +159,8 @@ If you don't want a global install, use `npx`:
   }
 }
 ```
+
+Because MCP servers are often configured globally, starting `httpi mcp` does **not** pick a project by server cwd. Every MCP tool call must include `projectRoot` pointing at the repository directory that contains `httpi/config.yaml`.
 
 Registered tools:
 

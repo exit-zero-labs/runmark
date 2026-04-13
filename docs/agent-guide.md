@@ -54,12 +54,15 @@ MCP equivalent:
 | inspect resolved values | `explain_variables` |
 | continue a paused or failed session | `resume_session` |
 
+Every MCP tool call must include `projectRoot`, because `httpi mcp` does not bind the server to a project when it starts.
+
 ## 3. MCP tool constraints that matter
 
 Two tool contracts are easy to misuse if you only skim the names:
 
-1. `run_definition` accepts **exactly one** of `requestId` or `runId`
-2. `explain_variables` accepts `requestId` or `runId`; when you use `runId`, `stepId` can narrow the explanation to a single run step
+1. every MCP tool call must include `projectRoot`
+2. `run_definition` accepts **exactly one** of `requestId` or `runId`
+3. `explain_variables` accepts `requestId` or `runId`; when you use `runId`, `stepId` can narrow the explanation to a single run step
 
 Safe examples:
 
@@ -74,7 +77,7 @@ Safe examples:
 Unsafe example:
 
 ```json
-{ "name": "run_definition", "arguments": { "requestId": "ping", "runId": "smoke" } }
+{ "name": "run_definition", "arguments": { "projectRoot": "/repo", "requestId": "ping", "runId": "smoke" } }
 ```
 
 ## 4. How to inspect a paused or failed run

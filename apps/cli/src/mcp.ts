@@ -39,9 +39,14 @@ const flatValueSchema = z.union([
   z.null(),
 ]);
 const overridesSchema = z.record(z.string(), flatValueSchema);
+const projectRootSchema = z
+  .string()
+  .describe("Path to the project root containing httpi/config.yaml.");
 
+// MCP servers are often launched outside the target repository, so every tool
+// call must identify the project explicitly instead of relying on server cwd.
 const engineOptionsSchema = {
-  projectRoot: z.string().optional(),
+  projectRoot: projectRootSchema,
 };
 
 const executionOptionsSchema = {
@@ -210,7 +215,7 @@ export function createMcpServer(): McpServer {
     "list_definitions",
     {
       description:
-        "Discover requests, runs, envs, and sessions in the current httpi project.",
+        "Discover requests, runs, envs, and sessions in an httpi project.",
       inputSchema: {
         ...engineOptionsSchema,
       },

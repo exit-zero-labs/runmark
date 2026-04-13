@@ -435,13 +435,13 @@ Secret rules:
 
 ### 9.1 Project discovery
 
-The engine searches upward from the current working directory for `httpi/config.yaml`.
+The engine can search upward from the current working directory for `httpi/config.yaml`.
 
 Discovery rules:
 
 - nearest matching config wins
 - search stops at the Git repository root
-- CLI and MCP may accept an explicit project override
+- CLI may rely on cwd-based discovery; MCP tool calls require an explicit `projectRoot`
 - if no project is found, the interface should instruct the operator to run `httpi init`
 
 ### 9.2 Validation

@@ -774,13 +774,13 @@ Secret rules:
 
 ### 11.1 Project discovery
 
-The engine discovers a project by searching upward from the current working directory for `httpi/config.yaml`.
+The engine can discover a project by searching upward from the current working directory for `httpi/config.yaml`.
 
 Discovery rules:
 
 - nearest matching `httpi/config.yaml` wins
 - search stops at the Git repository root
-- CLI and MCP may accept an explicit project override
+- CLI may rely on cwd-based discovery; MCP tool calls require an explicit `projectRoot`
 - if no project is found, return a clear error instructing the user to run `httpi init`
 
 ### 11.2 Validation

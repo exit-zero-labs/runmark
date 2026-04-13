@@ -457,6 +457,18 @@ test("CLI and MCP pin documented validation and runtime error contracts", async 
 
     await client.connect(transport);
 
+    const missingProjectRootTool = await client.callTool({
+      name: "list_definitions",
+      arguments: {},
+    });
+    assert.equal(missingProjectRootTool.isError, true);
+    assert.match(
+      missingProjectRootTool.content[0].text,
+      /Input validation error/,
+    );
+    assert.match(missingProjectRootTool.content[0].text, /projectRoot/);
+    assert.equal(missingProjectRootTool.structuredContent, undefined);
+
     const ambiguousTool = await client.callTool({
       name: "run_definition",
       arguments: {
@@ -1896,9 +1908,15 @@ test("MCP exposes the documented core tools over stdio", async () => {
       "get_session_state",
       "list_artifacts",
       "read_artifact",
+      "get_stream_chunks",
+      "cancel_session",
       "explain_variables",
     ]) {
-      assert(tools.tools.some((tool) => tool.name === toolName));
+      const tool = tools.tools.find((candidate) => candidate.name === toolName);
+      assert(tool);
+      assert(tool.inputSchema);
+      assert(Array.isArray(tool.inputSchema.required));
+      assert(tool.inputSchema.required.includes("projectRoot"));
     }
 
     const definitions = await client.callTool({

@@ -21,11 +21,18 @@ httpi run --run smoke
 
 When `--project-root` is omitted, the CLI discovers the nearest `httpi/config.yaml`.
 
+## MCP
+
+`httpi mcp` starts the stdio MCP server for agents.
+
+Because MCP servers are often launched outside the target repository, every MCP tool call must include `projectRoot` pointing at the project directory that contains `httpi/config.yaml`.
+
 ## What this package does
 
 - scaffolds a tracked `httpi/` project with `httpi init`
 - validates definitions before execution
 - runs requests and multi-step runs
+- starts `httpi mcp` for MCP clients
 - persists sessions and artifacts under `httpi/artifacts/`
 - lets you inspect artifacts and explicitly resume paused or failed runs
 

@@ -201,7 +201,7 @@ steps/<stepId>/
 
 New engine events: `stream.chunk.received`, `stream.first-byte`, `stream.completed`, `stream.failed`.
 
-**Principle check.** Pure data. Artifacts are still JSONL and inspectable. Redaction applies to each chunk. MCP exposes `get_stream_chunks(sessionId, stepId, range)` with the same redaction as `read_artifact`.
+**Principle check.** Pure data. Artifacts are still JSONL and inspectable. Redaction applies to each chunk. MCP exposes `get_stream_chunks(projectRoot, sessionId, stepId, range)` with the same redaction as `read_artifact`.
 
 **Priority.** **P0** for AI adoption. Without this, five of eight personas cannot use httpi at all.
 
@@ -307,7 +307,7 @@ Artifacts for binary bodies store a manifest entry with `sha256`, `size`, and a 
 - [x] **A1 redaction.** Code: `packages/execution/src/request-step-execution.ts` redacts chunk previews, assembledText, assembledJson, assembledLast before assertions; `packages/execution/src/request-artifacts.ts` re-redacts at artifact write. `redactJsonValue` walks JSON recursively. Fixture pending.
 - [x] **A1 artifact layout.** Code: `packages/runtime/src/artifacts.ts` writes `steps/<stepId>/attempt-<N>/stream/chunks.jsonl` and `stream/assembled.(json|txt)` with manifest entries. Fixture pending.
 - [x] **A1 engine events.** Code: `packages/execution/src/request-step-execution.ts` emits `stream.first-byte` / `stream.chunk.received` / `stream.completed` / `stream.failed` via `appendSessionEvent` with monotonic timestamps. Fixture pending.
-- [x] **A1 MCP parity.** Code: `apps/cli/src/mcp.ts` (loaded by the `httpi mcp` subcommand) registers `get_stream_chunks(sessionId, stepId, rangeStart?, rangeEnd?)` backed by `packages/execution/src/index.ts` `getSessionStreamChunks` → `packages/runtime/src/artifacts.ts` `readStreamChunks` (reads post-redaction on-disk artifact). Fixture pending.
+- [x] **A1 MCP parity.** Code: `apps/cli/src/mcp.ts` (loaded by the `httpi mcp` subcommand) registers `get_stream_chunks(projectRoot, sessionId, stepId, rangeStart?, rangeEnd?)` backed by `packages/execution/src/index.ts` `getSessionStreamChunks` → `packages/runtime/src/artifacts.ts` `readStreamChunks` (reads post-redaction on-disk artifact). Fixture pending.
 - [x] **A2 per-step timeout.** Code: `packages/http/src/index.ts` `AbortSignal.timeout(request.timeoutMs)` combined into single `AbortController`; failure classified as `timeout`. Fixture pending.
 - [x] **A2 per-run timeout.** Code: `CompiledRunSnapshot.runTimeoutMs` propagated from `RunDefinition.timeoutMs`; `packages/execution/src/session-execution.ts` polls wall-clock at each step boundary and emits `session.interrupted` with `message: "run timeout Xms"`. Fixture pending.
 - [x] **A2 cancellation.** Code: `packages/runtime/src/session-cancel.ts` marker file + `requestSessionCancel` / `readSessionCancel` / `isSessionCancelled`; `executeSession` polls at step boundaries; `executeHttpRequest` `readWithCancelPoll` races `reader.read()` against a 100 ms cancel poll to abort mid-stream. CLI `httpi cancel` + MCP `cancel_session` both go through `cancelSessionRun`. Fixture pending.
@@ -1241,8 +1241,8 @@ Runs launched with `httpi run --confirm-all` or MCP `run_definition` with `confi
 **Automated checks (CI / agent-executable):**
 
 - [ ] **E1 compact MCP response.** Execute a request that returns a 50 KB JSON body via MCP `run_definition`. Verify the response does NOT inline the body. Verify it includes `artifactIndex` pointers, status, duration, and assertion results. Measure the response token count; assert it is < 2000 tokens.
-- [ ] **E1 `read_artifact` summary mode.** Call `read_artifact(sessionId, stepId, summary: true)`. Verify the output includes top-level keys, types, array lengths, and a truncated preview. Verify the full body is NOT returned.
-- [ ] **E1 `read_artifact` with JMESPath/JSONPath.** Call `read_artifact` with `jmespath: "user.name"`. Verify only the extracted value is returned, not the full body.
+- [ ] **E1 `read_artifact` summary mode.** Call `read_artifact(projectRoot, sessionId, relativePath, summary: true)`. Verify the output includes top-level keys, types, array lengths, and a truncated preview. Verify the full body is NOT returned.
+- [ ] **E1 `read_artifact` with JMESPath/JSONPath.** Call `read_artifact(projectRoot, sessionId, relativePath, jmespath: "user.name")`. Verify only the extracted value is returned, not the full body.
 - [ ] **E1 CLI parity.** Run `httpi artifacts read <path> --summary` and `--full`. Verify `--summary` matches the MCP summary mode output. Verify `--jq` produces equivalent results to MCP's `jmespath`.
 - [x] **E2 structured diagnostic — validation error.** Load a YAML file with a typo in a required field. Verify the diagnostic includes `{ file, line, column, code, message, hint }` and that `file:line` points to the exact YAML key.
 - [x] **E2 structured diagnostic — assertion failure.** Run an assertion that fails. Verify the diagnostic includes `file:line` pointing to the `expect:` block in the YAML definition.
