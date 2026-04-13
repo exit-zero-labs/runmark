@@ -19,6 +19,13 @@ One package, two surfaces:
 npm install -g @exit-zero-labs/httpi
 ```
 
+To update an existing global install:
+
+```bash
+npm install -g @exit-zero-labs/httpi@latest
+httpi --version
+```
+
 - `httpi` — the CLI for humans and scripts.
 - `httpi mcp` — the stdio MCP server for agents (same engine, same redaction, same artifacts).
 

@@ -9,6 +9,13 @@ npm install -g @exit-zero-labs/httpi
 httpi --version
 ```
 
+To update an existing global install:
+
+```bash
+npm install -g @exit-zero-labs/httpi@latest
+httpi --version
+```
+
 ## Quick start
 
 ```bash
