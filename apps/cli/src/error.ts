@@ -1,4 +1,4 @@
-import { isDiagnostic, type Diagnostic } from "@exit-zero-labs/httpi-contracts";
+import { type Diagnostic, isDiagnostic } from "@exit-zero-labs/httpi-contracts";
 import {
   coerceErrorMessage,
   exitCodes,
@@ -38,7 +38,9 @@ function renderCliFailureMessage(message: string, details: unknown): string {
   const diagnostics = extractDiagnostics(details);
   if (diagnostics) {
     const formattedDiagnostics = formatCliDiagnostics(diagnostics);
-    return formattedDiagnostics ? `${message}\n${formattedDiagnostics}` : message;
+    return formattedDiagnostics
+      ? `${message}\n${formattedDiagnostics}`
+      : message;
   }
 
   const formattedDetails = JSON.stringify(details, null, 2);

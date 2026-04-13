@@ -6,6 +6,10 @@ import { join, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { toCliFailure } from "../../apps/cli/testing.js";
+import {
+  appendDiagnosticPath,
+  toDisplayDiagnosticFile,
+} from "../../packages/contracts/dist/index.js";
 import { loadProjectFiles } from "../../packages/definitions/dist/index.js";
 import { initProject } from "../../packages/execution/dist/index.js";
 import {
@@ -14,10 +18,6 @@ import {
   redactSessionForOutput,
   resolveTemplateValue,
 } from "../../packages/execution/testing.js";
-import {
-  appendDiagnosticPath,
-  toDisplayDiagnosticFile,
-} from "../../packages/contracts/dist/index.js";
 import { executeHttpRequest } from "../../packages/http/dist/index.js";
 import {
   acquireSessionLock,

@@ -1043,7 +1043,10 @@ test("CLI and MCP surface body-file template diagnostics with file locations", a
     );
     assert(bodyDiagnostic);
     assert.equal(bodyDiagnostic.file, "httpi/bodies/security/template.json");
-    assert.equal(bodyDiagnostic.filePath, "httpi/bodies/security/template.json");
+    assert.equal(
+      bodyDiagnostic.filePath,
+      "httpi/bodies/security/template.json",
+    );
     assert.equal(bodyDiagnostic.line, 1);
   } finally {
     await client.close().catch(() => undefined);
@@ -1215,10 +1218,7 @@ test("CLI and MCP surface nested JSON body diagnostics with exact paths", async 
       bodyDiagnostic.file,
       "httpi/requests/security/nested-json.request.yaml",
     );
-    assert.equal(
-      bodyDiagnostic.path,
-      "body.json.user.credentials.token",
-    );
+    assert.equal(bodyDiagnostic.path, "body.json.user.credentials.token");
     assert.equal(bodyDiagnostic.line, 9);
   } finally {
     await client.close().catch(() => undefined);
@@ -2594,7 +2594,13 @@ test("CLI and MCP surface invalid timeout diagnostics with source locations", as
       "utf8",
     );
     await writeFile(
-      join(projectRoot, "httpi", "requests", "qa", "invalid-timeout.request.yaml"),
+      join(
+        projectRoot,
+        "httpi",
+        "requests",
+        "qa",
+        "invalid-timeout.request.yaml",
+      ),
       [
         "kind: request",
         "title: Invalid timeout",

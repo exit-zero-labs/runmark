@@ -318,8 +318,8 @@ async function executeStreamingResponse(
   const assembledText = shouldCaptureAssembled
     ? assembledParts.join("\n")
     : undefined;
-  let assembledJson;
-  let assembledLast: unknown | undefined;
+  let assembledJson: unknown;
+  let assembledLast: unknown;
   if (shouldCaptureAssembled && assembledParts.length > 0) {
     try {
       if (streamConfig.parse === "ndjson") {
@@ -417,7 +417,7 @@ async function executeStreamingResponse(
     stream: {
       chunks,
       assembledText,
-      assembledJson,
+      assembledJson: assembledJson as StreamAssembledLast | undefined,
       ...(assembledLast !== undefined
         ? { assembledLast: assembledLast as StreamAssembledLast }
         : {}),

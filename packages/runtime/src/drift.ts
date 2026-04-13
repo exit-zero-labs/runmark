@@ -12,13 +12,13 @@ import {
   sha256Hex,
 } from "@exit-zero-labs/httpi-shared";
 import {
-  LineCounter,
   isMap,
   isScalar,
   isSeq,
-  parseDocument,
+  LineCounter,
   type Node,
   type ParsedNode,
+  parseDocument,
 } from "yaml";
 import { isMissingPathError } from "./runtime-errors.js";
 
@@ -29,9 +29,9 @@ export async function detectDefinitionDrift(
 ): Promise<Diagnostic[]> {
   const diagnostics: Diagnostic[] = [];
   const resolvedProjectRoot = await realpath(projectRoot);
-  const definitionFilePaths = Object.keys(session.compiled.definitionHashes).sort(
-    (left, right) => left.localeCompare(right),
-  );
+  const definitionFilePaths = Object.keys(
+    session.compiled.definitionHashes,
+  ).sort((left, right) => left.localeCompare(right));
 
   for (const [filePath, expectedHash] of Object.entries(
     session.compiled.definitionHashes,
@@ -172,10 +172,12 @@ async function findProcessEnvReferenceDiagnostic(
 function findYamlTokenPosition(
   rawContent: string,
   searchToken: string,
-): {
-  line: number;
-  column: number;
-} | undefined {
+):
+  | {
+      line: number;
+      column: number;
+    }
+  | undefined {
   const lineCounter = new LineCounter();
   const document = parseDocument(rawContent, {
     lineCounter,

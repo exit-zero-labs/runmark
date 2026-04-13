@@ -90,12 +90,8 @@ export function resolveTemplateValue(
     secretValues: uniqueSecretValues(
       interpolation.tokens.flatMap(
         (token) =>
-          resolveToken(
-            token,
-            context,
-            new Set(),
-            diagnosticLocation,
-          )?.secretValues ?? [],
+          resolveToken(token, context, new Set(), diagnosticLocation)
+            ?.secretValues ?? [],
       ),
     ),
   };
@@ -335,12 +331,7 @@ function resolveScalarValue(
   const exactToken = matchExactToken(value);
   if (exactToken) {
     return applyOverrideSecretTaint(
-      requireResolvedToken(
-        exactToken,
-        context,
-        seenTokens,
-        diagnosticLocation,
-      ),
+      requireResolvedToken(exactToken, context, seenTokens, diagnosticLocation),
     );
   }
 
@@ -355,7 +346,7 @@ function resolveScalarValue(
       return undefined;
     }
 
-      return resolvedToken.value === null ? "null" : String(resolvedToken.value);
+    return resolvedToken.value === null ? "null" : String(resolvedToken.value);
   });
   assertNoUnresolvedTokens(interpolation.unresolved, diagnosticLocation);
 
@@ -370,12 +361,8 @@ function resolveScalarValue(
     secretValues: uniqueSecretValues(
       interpolation.tokens.flatMap(
         (token) =>
-          resolveToken(
-            token,
-            context,
-            seenTokens,
-            diagnosticLocation,
-          )?.secretValues ?? [],
+          resolveToken(token, context, seenTokens, diagnosticLocation)
+            ?.secretValues ?? [],
       ),
     ),
   });

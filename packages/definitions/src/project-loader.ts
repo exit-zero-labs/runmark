@@ -128,7 +128,9 @@ export async function loadProjectFiles(
   };
 
   projectFiles.diagnostics.push(
-    ...(await enrichDiagnosticsFromFiles(validateProjectReferences(projectFiles))),
+    ...(await enrichDiagnosticsFromFiles(
+      validateProjectReferences(projectFiles),
+    )),
   );
   return projectFiles;
 }

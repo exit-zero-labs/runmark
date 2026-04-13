@@ -114,8 +114,7 @@ export function normalizeCapturePolicy(
       filePath,
       diagnostics,
       "capture",
-    ) ??
-    defaultCapturePolicy.requestSummary;
+    ) ?? defaultCapturePolicy.requestSummary;
   const responseMetadata =
     readOptionalBoolean(
       record,
@@ -123,8 +122,7 @@ export function normalizeCapturePolicy(
       filePath,
       diagnostics,
       "capture",
-    ) ??
-    defaultCapturePolicy.responseMetadata;
+    ) ?? defaultCapturePolicy.responseMetadata;
 
   let responseBody = defaultCapturePolicy.responseBody;
   if (record.responseBody !== undefined) {
@@ -152,8 +150,7 @@ export function normalizeCapturePolicy(
       filePath,
       diagnostics,
       "capture",
-    ) ??
-    defaultCapturePolicy.maxBodyBytes;
+    ) ?? defaultCapturePolicy.maxBodyBytes;
 
   const redactHeadersValue = record.redactHeaders;
   let redactHeaders = defaultCapturePolicy.redactHeaders;
@@ -267,7 +264,8 @@ export function readRequiredString(
 ): string | undefined {
   const value = record[key];
   if (typeof value !== "string") {
-    const typoKey = value === undefined ? findLikelyTypoKey(record, key) : undefined;
+    const typoKey =
+      value === undefined ? findLikelyTypoKey(record, key) : undefined;
     diagnostics.push({
       level: "error",
       code: "INVALID_STRING",
@@ -655,9 +653,7 @@ function joinDiagnosticPath(pathSegments: string[]): string {
   let path = "";
 
   for (const segment of pathSegments) {
-    const normalizedSegment = /^\d+$/.test(segment)
-      ? Number(segment)
-      : segment;
+    const normalizedSegment = /^\d+$/.test(segment) ? Number(segment) : segment;
     if (!path) {
       path =
         typeof normalizedSegment === "number"

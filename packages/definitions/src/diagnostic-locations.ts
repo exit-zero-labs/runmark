@@ -5,13 +5,7 @@ import type {
 import { toDisplayDiagnosticFile } from "@exit-zero-labs/httpi-contracts";
 import { readUtf8File } from "@exit-zero-labs/httpi-shared";
 import type { Node, Pair, ParsedNode, Scalar, YAMLMap, YAMLSeq } from "yaml";
-import {
-  LineCounter,
-  isMap,
-  isScalar,
-  isSeq,
-  parseDocument,
-} from "yaml";
+import { isMap, isScalar, isSeq, LineCounter, parseDocument } from "yaml";
 
 interface PathPropertySegment {
   kind: "property";
@@ -32,7 +26,9 @@ interface LocatedSequenceItem {
 
 export interface YamlDiagnosticResolver {
   readonly filePath: string;
-  resolve(path?: string): Required<Pick<Diagnostic, "file" | "line" | "column">>;
+  resolve(
+    path?: string,
+  ): Required<Pick<Diagnostic, "file" | "line" | "column">>;
 }
 
 export function createYamlDiagnosticResolver(
@@ -80,8 +76,8 @@ export async function enrichDiagnosticsFromFiles(
 
       let resolverPromise = resolverCache.get(filePath);
       if (!resolverPromise) {
-        resolverPromise = createYamlDiagnosticResolverFromFile(filePath).catch(() =>
-          createFallbackDiagnosticResolver(filePath),
+        resolverPromise = createYamlDiagnosticResolverFromFile(filePath).catch(
+          () => createFallbackDiagnosticResolver(filePath),
         );
         resolverCache.set(filePath, resolverPromise);
       }
@@ -95,7 +91,8 @@ export function finalizeDiagnostic(
   diagnostic: Diagnostic,
   resolver?: YamlDiagnosticResolver,
 ): EnrichedDiagnostic {
-  const resolvedFilePath = diagnostic.file ?? diagnostic.filePath ?? resolver?.filePath;
+  const resolvedFilePath =
+    diagnostic.file ?? diagnostic.filePath ?? resolver?.filePath;
   const resolvedLocation = diagnostic.path
     ? resolver?.resolve(diagnostic.path)
     : undefined;
@@ -119,7 +116,9 @@ async function createYamlDiagnosticResolverFromFile(
   return createYamlDiagnosticResolver(filePath, await readUtf8File(filePath));
 }
 
-function createFallbackDiagnosticResolver(filePath: string): YamlDiagnosticResolver {
+function createFallbackDiagnosticResolver(
+  filePath: string,
+): YamlDiagnosticResolver {
   return {
     filePath,
     resolve() {
@@ -257,10 +256,12 @@ function tokenizeDiagnosticPath(path: string): PathSegment[] {
 function readQuotedPathSegment(
   path: string,
   startIndex: number,
-): {
-  value: string;
-  nextIndex: number;
-} | undefined {
+):
+  | {
+      value: string;
+      nextIndex: number;
+    }
+  | undefined {
   let index = startIndex + 2;
   let encodedValue = '"';
   let escaped = false;
@@ -334,7 +335,9 @@ function findSequenceItem(
     }
 
     const idPair = item.items.find(
-      (pair) => getScalarText(pair.key) === "id" && getScalarText(pair.value) === segment.value,
+      (pair) =>
+        getScalarText(pair.key) === "id" &&
+        getScalarText(pair.value) === segment.value,
     );
     if (idPair) {
       return {
