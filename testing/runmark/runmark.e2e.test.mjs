@@ -401,6 +401,211 @@ test("CLI rejects secret session companion files with mismatched session ids", a
   }
 });
 
+test("CLI quickstart scaffolds, runs, and emits a human-friendly stderr hint", async () => {
+  // Start our own demo server on an ephemeral port so this test never clashes
+  // with the default 4318 port a parallel test run might be holding.
+  const { server, baseUrl } = await startDemoServer({ port: 0 });
+  const projectRoot = await mkdtemp(join(tmpdir(), "runmark-quickstart-"));
+
+  try {
+    // Init first so we can pin the env to the ephemeral demo URL, then run
+    // quickstart with --no-demo so it reuses the already-running server.
+    const initResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "init",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(initResult.code, 0, initResult.stderr);
+    assert.match(initResult.stderr, /runmark initialized at/);
+    assert.match(initResult.stderr, /Next: runmark quickstart/);
+
+    const envPath = join(projectRoot, "runmark", "env", "dev.env.yaml");
+    const envYaml = await readFile(envPath, "utf8");
+    await writeFile(
+      envPath,
+      envYaml.replace(/baseUrl: .*/, `baseUrl: ${baseUrl}`),
+      "utf8",
+    );
+
+    const quickstartResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "quickstart",
+      "--no-demo",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(quickstartResult.code, 0, quickstartResult.stderr);
+    const parsed = JSON.parse(quickstartResult.stdout);
+    assert.equal(parsed.runId, "smoke");
+    assert.equal(parsed.initialized, false);
+    assert.equal(parsed.demoBaseUrl, undefined);
+    assert.equal(parsed.execution.session.state, "completed");
+    assert.match(quickstartResult.stderr, /run smoke completed/);
+    assert.match(quickstartResult.stderr, /runmark session show /);
+  } finally {
+    await new Promise((resolveClose) => server.close(() => resolveClose()));
+    await rm(projectRoot, { recursive: true, force: true });
+  }
+});
+
+test("CLI run with no target picks the sole run and errors clearly when ambiguous", async () => {
+  const { server, baseUrl } = await startDemoServer({ port: 0 });
+  const projectRoot = await mkdtemp(join(tmpdir(), "runmark-run-sole-"));
+
+  try {
+    const initResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "init",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(initResult.code, 0, initResult.stderr);
+
+    const envPath = join(projectRoot, "runmark", "env", "dev.env.yaml");
+    const envYaml = await readFile(envPath, "utf8");
+    await writeFile(
+      envPath,
+      envYaml.replace(/baseUrl: .*/, `baseUrl: ${baseUrl}`),
+      "utf8",
+    );
+
+    const runNoArgs = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "run",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(runNoArgs.code, 0, runNoArgs.stderr);
+    assert.match(runNoArgs.stderr, /Using the only run defined: smoke/);
+    const runParsed = JSON.parse(runNoArgs.stdout);
+    assert.equal(runParsed.session.state, "completed");
+
+    // Scaffold a second run file so no-args run becomes ambiguous.
+    await writeFile(
+      join(projectRoot, "runmark", "runs", "other.run.yaml"),
+      [
+        "kind: run",
+        "title: Other",
+        "env: dev",
+        "steps:",
+        "  - kind: request",
+        "    id: ping",
+        "    uses: ping",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const ambiguous = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "run",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(ambiguous.code, 2);
+    assert.match(ambiguous.stderr, /Multiple runs defined/);
+    assert.match(ambiguous.stderr, /Pass --run <id>/);
+  } finally {
+    await new Promise((resolveClose) => server.close(() => resolveClose()));
+    await rm(projectRoot, { recursive: true, force: true });
+  }
+});
+
+test("CLI run writes multi-format reporters and always-on summary artifacts", async () => {
+  const { server, baseUrl } = await startDemoServer({ port: 0 });
+  const projectRoot = await mkdtemp(join(tmpdir(), "runmark-reporters-"));
+
+  try {
+    const initResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "init",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(initResult.code, 0, initResult.stderr);
+
+    const envPath = join(projectRoot, "runmark", "env", "dev.env.yaml");
+    const envYaml = await readFile(envPath, "utf8");
+    await writeFile(
+      envPath,
+      envYaml.replace(/baseUrl: .*/, `baseUrl: ${baseUrl}`),
+      "utf8",
+    );
+
+    const runResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "run",
+      "--run",
+      "smoke",
+      "--reporter",
+      "junit",
+      "--reporter",
+      "tap",
+      "--reporter",
+      "summary",
+      "--reporter",
+      "github",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(runResult.code, 0, runResult.stderr);
+    const execution = JSON.parse(runResult.stdout);
+    const sessionId = execution.session.sessionId;
+
+    const reportsDir = join(projectRoot, "runmark", "artifacts", "reports");
+    const junitXml = await readFile(
+      join(reportsDir, `${sessionId}.xml`),
+      "utf8",
+    );
+    assert.match(junitXml, /<testsuite[^>]*name="smoke"/);
+    assert.match(junitXml, /<testcase[^>]*name="ping"/);
+
+    const tap = await readFile(join(reportsDir, `${sessionId}.tap`), "utf8");
+    assert.match(tap, /^TAP version 13/);
+    assert.match(tap, /\nok 1 - ping/);
+
+    const summaryMd = await readFile(
+      join(reportsDir, `${sessionId}.md`),
+      "utf8",
+    );
+    assert.match(summaryMd, /# .* Runmark session /);
+    assert.match(summaryMd, /Run: `smoke`/);
+
+    const annotations = await readFile(
+      join(reportsDir, `${sessionId}.txt`),
+      "utf8",
+    );
+    // Demo smoke runs clean, so we expect the default no-diagnostics notice.
+    assert.match(annotations, /::notice::/);
+
+    // Always-on summary artifacts next to the session manifest.
+    const historyDir = join(
+      projectRoot,
+      "runmark",
+      "artifacts",
+      "history",
+      sessionId,
+    );
+    const summaryJson = JSON.parse(
+      await readFile(join(historyDir, "summary.json"), "utf8"),
+    );
+    assert.equal(summaryJson.sessionId, sessionId);
+    assert.equal(summaryJson.runId, "smoke");
+    assert.equal(summaryJson.state, "completed");
+    assert.ok(summaryJson.totals.steps >= 1);
+
+    const autoSummaryMd = await readFile(
+      join(historyDir, "summary.md"),
+      "utf8",
+    );
+    assert.match(autoSummaryMd, /Runmark session /);
+  } finally {
+    await new Promise((resolveClose) => server.close(() => resolveClose()));
+    await rm(projectRoot, { recursive: true, force: true });
+  }
+});
+
 test("CLI init scaffolds schema hints and preserves documented validation exits", async () => {
   const projectRoot = await mkdtemp(join(tmpdir(), "runmark-init-"));
 
@@ -414,8 +619,8 @@ test("CLI init scaffolds schema hints and preserves documented validation exits"
     assert.equal(initResult.code, 0, initResult.stderr);
     const initializedProject = JSON.parse(initResult.stdout);
     assert.deepEqual(initializedProject.nextSteps, [
-      "In another terminal: runmark demo start",
-      "Then run: runmark run --run smoke",
+      "Run everything in one command: runmark quickstart",
+      "Or manually: in another terminal run `runmark demo start`, then `runmark run --run smoke`",
     ]);
 
     const configYaml = await readFile(
@@ -482,12 +687,13 @@ test("CLI exposes help and version discovery, including the `runmark mcp` subcom
   assert.match(cliHelp.stdout, /List targets:/);
   // MCP is now a subcommand of the CLI; help must advertise it.
   assert.match(cliHelp.stdout, /runmark mcp/);
+  assert.match(cliHelp.stdout, /runmark quickstart/);
   assert.match(cliHelp.stdout, /runmark demo start/);
   assert.match(cliHelp.stdout, /runmark clean/);
   assert.match(cliHelp.stdout, /runmark audit export/);
   assert.match(
     cliHelp.stdout,
-    /Examples:\n {2}runmark demo start\n {2}runmark init\n {2}runmark run --run smoke\n {2}runmark mcp/,
+    /Examples:\n {2}runmark quickstart\n {2}runmark demo start\n {2}runmark init\n {2}runmark run --run smoke\n {2}runmark mcp/,
   );
 
   const mcpHelp = await runNodeProcess(process.execPath, [cliEntrypoint, "mcp", "--help"]);
@@ -657,7 +863,7 @@ test("CLI audit export and clean work against the demo-backed init scaffold", as
       "runmark",
       "artifacts",
       "reports",
-      "run.json",
+      `${sessionId}.json`,
     );
     const report = JSON.parse(await readFile(reportPath, "utf8"));
     assert.equal(report.session.sessionId, sessionId);
@@ -1172,6 +1378,25 @@ test("CLI and MCP pin documented validation and runtime error contracts", async 
     assert.equal(ambiguousRun.code, 2);
     assert.match(ambiguousRun.stderr, /either --request <id> or --run <id>/);
 
+    // With the sole-run convenience, `runmark run` with no target now auto-picks
+    // when exactly one run exists. The explicit error surface fires when the
+    // project has no runs at all or when multiple runs are defined, so scaffold
+    // a second run to make the fixture ambiguous and assert the new code-2
+    // error message.
+    await writeFile(
+      join(projectRoot, "runmark", "runs", "other.run.yaml"),
+      [
+        "kind: run",
+        "title: Other",
+        "env: dev",
+        "steps:",
+        "  - kind: request",
+        "    id: ping",
+        "    uses: ping",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
     const missingRunTarget = await runNodeProcess(process.execPath, [
       cliEntrypoint,
       "run",
@@ -1179,11 +1404,8 @@ test("CLI and MCP pin documented validation and runtime error contracts", async 
       projectRoot,
     ]);
     assert.equal(missingRunTarget.code, 2);
-    assert.match(
-      missingRunTarget.stderr,
-      /Run command requires either --request <id> or --run <id>\./,
-    );
-    assert.match(missingRunTarget.stderr, /Example: runmark run --request ping/);
+    assert.match(missingRunTarget.stderr, /Multiple runs defined/);
+    assert.match(missingRunTarget.stderr, /Pass --run <id>/);
 
     const demoNoSubcommand = await runNodeProcess(process.execPath, [
       cliEntrypoint,

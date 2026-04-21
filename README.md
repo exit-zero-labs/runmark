@@ -57,18 +57,38 @@ runmark init
 
 ## Quick start
 
-After `init`, start the bundled demo API in another terminal and run:
+One command scaffolds a new project, starts the bundled demo server in-process, runs the smoke flow, and tears the demo down again:
 
 ```bash
-runmark demo start
+mkdir demo-api && cd demo-api
+runmark quickstart
+```
+
+When there's no existing project, `quickstart` scaffolds one. When there is one, it re-runs the smoke flow. Pass `--no-demo` if your target service is already running, or `--port <n>` to move the demo off `4318`.
+
+Typical output is the full execution result as JSON on stdout, plus a one-line human hint on stderr, e.g.:
+
+```
+[runmark] ✓ scaffolded project at /path/to/demo-api
+[runmark] ✓ demo server ran on http://127.0.0.1:4318
+[runmark] ✓ run smoke completed. Inspect: runmark session show run-<timestamp>-<id>
+```
+
+### Step-by-step equivalent
+
+If you prefer to see each step explicitly:
+
+```bash
+runmark init
+runmark demo start            # in another terminal
 runmark validate
 runmark describe --run smoke
-runmark run --run smoke
+runmark run                   # picks the sole run when only one is defined
 ```
 
 `runmark init` gives you a small but real starting point: one environment, one request, one run, and schema-aware YAML files. The scaffolded `dev` env already points at the bundled demo server on `http://127.0.0.1:4318`, so you can reach first success before wiring your own service.
 
-Typical output looks like this:
+Typical `init` output looks like this:
 
 ```json
 {
@@ -84,8 +104,8 @@ Typical output looks like this:
     "/path/to/demo-api/.gitignore"
   ],
   "nextSteps": [
-    "In another terminal: runmark demo start",
-    "Then run: runmark run --run smoke"
+    "Run everything in one command: runmark quickstart",
+    "Or manually: in another terminal run `runmark demo start`, then `runmark run --run smoke`"
   ]
 }
 ```
@@ -273,6 +293,7 @@ Use these guides when the project moves beyond a single laptop:
 
 | Goal | Command |
 | --- | --- |
+| scaffold + demo + run in one command | `quickstart` |
 | scaffold a project | `init` |
 | discover requests, runs, envs, or sessions | `list` |
 | validate before execution | `validate` |

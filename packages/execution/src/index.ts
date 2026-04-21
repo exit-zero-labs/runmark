@@ -152,9 +152,23 @@ import {
 } from "./redaction.js";
 import { materializeRequest } from "./request-resolution.js";
 import { executeSession } from "./session-execution.js";
+import { writeSessionSummaryArtifacts } from "./session-summary.js";
 import type { EngineOptions } from "./types.js";
 
 export { initProject } from "./project-init.js";
+export { quickstartProject } from "./quickstart.js";
+export type { QuickstartOptions, QuickstartResult } from "./quickstart.js";
+export {
+  buildSessionSummary,
+  formatReporter,
+} from "./reporters.js";
+export type {
+  ReporterArtifact,
+  ReporterFormat,
+  SessionStepSummary,
+  SessionSummary,
+} from "./reporters.js";
+export { writeSessionSummaryArtifacts } from "./session-summary.js";
 export type { EngineOptions, InitProjectResult } from "./types.js";
 
 /** Discover tracked definitions plus persisted runtime sessions for a project. */
@@ -284,10 +298,12 @@ export async function runRequest(
 
     const session = createSessionRecord(compiled);
     const result = await executeSession(context.rootDir, session);
-    return {
+    const redacted: ExecutionResult = {
       ...result,
       session: redactSessionForOutput(result.session),
     };
+    await writeSessionSummaryArtifacts(redacted);
+    return redacted;
   });
 }
 
@@ -309,10 +325,12 @@ export async function runRun(
 
     const session = createSessionRecord(compiled);
     const result = await executeSession(context.rootDir, session);
-    return {
+    const redacted: ExecutionResult = {
       ...result,
       session: redactSessionForOutput(result.session),
     };
+    await writeSessionSummaryArtifacts(redacted);
+    return redacted;
   });
 }
 
@@ -350,10 +368,12 @@ export async function resumeSessionRun(
   }
 
   const result = await executeSession(rootDir, session);
-  return {
+  const redacted: ExecutionResult = {
     ...result,
     session: redactSessionForOutput(result.session),
   };
+  await writeSessionSummaryArtifacts(redacted);
+  return redacted;
 }
 
 /** Read the persisted session plus any drift diagnostics that affect resume. */

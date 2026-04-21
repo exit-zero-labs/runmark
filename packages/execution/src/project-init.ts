@@ -18,8 +18,8 @@ const schemaBaseUrl =
   "https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas";
 const demoBaseUrl = "http://127.0.0.1:4318";
 const initNextSteps = [
-  "In another terminal: runmark demo start",
-  "Then run: runmark run --run smoke",
+  "Run everything in one command: runmark quickstart",
+  "Or manually: in another terminal run `runmark demo start`, then `runmark run --run smoke`",
 ];
 const runtimeGitignoreSentinel = `${runtimeDirectoryName}/*`;
 const runtimeGitignoreBlockLines = [

@@ -10,6 +10,7 @@ import { dirname } from "node:path";
 import type {
   CleanableSessionState,
   Diagnostic,
+  ExecutionResult,
   FlatVariableMap,
 } from "@exit-zero-labs/runmark-contracts";
 import {
@@ -25,6 +26,7 @@ import {
   installSignalCancelHandler,
   listProjectDefinitions,
   listSessionArtifacts,
+  quickstartProject,
   readSessionArtifact,
   resumeSessionRun,
   runRequest,
@@ -73,6 +75,29 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     return exitCodes.success;
   }
 
+  if (command === "quickstart") {
+    installSignalCancelHandler();
+    const host = parsedArgs.flags.host?.[0];
+    const portFlag = parseOptionalIntegerFlag(
+      parsedArgs.flags.port?.[0],
+      "--port",
+      { minimum: 0 },
+    );
+    const result = await quickstartProject({
+      projectRoot,
+      noDemo: hasFlag(parsedArgs.flags, "no-demo"),
+      runId: parsedArgs.flags.run?.[0],
+      ...(host !== undefined ? { host } : {}),
+      ...(portFlag !== undefined ? { port: portFlag } : {}),
+    });
+    writeDiagnostics(result.execution.diagnostics);
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    writeQuickstartHint(result);
+    return result.execution.session.state === "failed"
+      ? exitCodes.executionFailure
+      : exitCodes.success;
+  }
+
   if (command === "demo") {
     if (parsedArgs.positionals[1] !== "start") {
       throw new RunmarkError(
@@ -94,6 +119,9 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
   if (command === "init") {
     const result = await initProject(projectRoot ?? process.cwd());
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    writeStderrHint(
+      `✓ runmark initialized at ${result.rootDir}. Next: runmark quickstart`,
+    );
     return exitCodes.success;
   }
 
@@ -198,14 +226,17 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
   }
 
   if (command === "run") {
-    const requestId = parsedArgs.flags.request?.[0];
-    const runId = parsedArgs.flags.run?.[0];
+    let requestId = parsedArgs.flags.request?.[0];
+    let runId = parsedArgs.flags.run?.[0];
     assertSingleTarget(requestId, runId, "run");
+    if (!requestId && !runId) {
+      runId = await resolveSoleRunId(projectRoot, "run");
+    }
     // Wire SIGINT/SIGTERM so Ctrl-C translates into a cancel marker and the
     // active session transitions to 'interrupted' cleanly.
     installSignalCancelHandler();
 
-    const reporterFlag = parsedArgs.flags.reporter?.[0];
+    const reporterFlag = parsedArgs.flags.reporter;
 
     if (requestId) {
       const result = await runRequest(requestId, {
@@ -216,6 +247,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       writeDiagnostics(result.diagnostics);
       await maybeWriteReporter(reporterFlag, result);
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      writeRunHint(result, `request ${requestId}`);
       return result.session.state === "failed"
         ? exitCodes.executionFailure
         : exitCodes.success;
@@ -230,6 +262,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       writeDiagnostics(result.diagnostics);
       await maybeWriteReporter(reporterFlag, result);
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      writeRunHint(result, `run ${runId}`);
       return result.session.state === "failed"
         ? exitCodes.executionFailure
         : exitCodes.success;
@@ -237,7 +270,7 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
 
     throw new RunmarkError(
       "RUN_TARGET_REQUIRED",
-      requiredTargetMessage("run", "runmark run --request ping"),
+      requiredTargetMessage("run", "runmark run --run smoke"),
       { exitCode: exitCodes.validationFailure },
     );
   }
@@ -299,6 +332,8 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
     const result = await resumeSessionRun(sessionId, { projectRoot });
     writeDiagnostics(result.diagnostics);
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    writeRunHint(result, `session ${sessionId}`);
+    await maybeWriteReporter(parsedArgs.flags.reporter, result);
     return result.session.state === "failed"
       ? exitCodes.executionFailure
       : exitCodes.success;
@@ -482,14 +517,14 @@ Usage:
   runmark --help
   runmark help <command>
   runmark --version
+  runmark quickstart [--no-demo] [--run <id>] [--host <host>] [--port <port>] [--project-root <path>]
   runmark demo start [--host <host>] [--port <port>]
   runmark init [--project-root <path>]
   runmark list <requests|runs|envs|sessions> [--project-root <path>]
   runmark validate [--project-root <path>]
   runmark describe --request <id> [--env <id>] [--input key=value] [--project-root <path>]
   runmark describe --run <id> [--env <id>] [--input key=value] [--project-root <path>]
-  runmark run --request <id> [--env <id>] [--input key=value] [--reporter <spec>] [--project-root <path>]
-  runmark run --run <id> [--env <id>] [--input key=value] [--reporter <spec>] [--project-root <path>]
+  runmark run [--request <id> | --run <id>] [--env <id>] [--input key=value] [--reporter <spec>] [--project-root <path>]
   runmark cancel <sessionId> [--reason <text>] [--project-root <path>]
   runmark snapshot accept <sessionId> --step <stepId> [--project-root <path>]
   runmark resume <sessionId> [--project-root <path>]
@@ -513,6 +548,7 @@ Notes:
   - Use "runmark help <command>" or "<command> --help" for subcommand-specific flags and examples.
 
 Examples:
+  runmark quickstart
   runmark demo start
   runmark init
   runmark run --run smoke
@@ -535,6 +571,28 @@ Defaults:
 Examples:
   runmark demo start
   runmark demo start --port 5000
+`,
+  quickstart: `runmark quickstart
+
+Usage:
+  runmark quickstart [--no-demo] [--run <id>] [--host <host>] [--port <port>] [--project-root <path>]
+
+What it does:
+  One-command onboarding: scaffolds a project if needed, starts the bundled demo
+  server in-process, runs the project's sole run (or the one named "smoke"), and
+  then stops the demo server. Returns the full execution result as JSON on stdout.
+
+Flags:
+  --no-demo          Skip starting the bundled demo server (use when your target
+                     service is already running).
+  --run <id>         Override which run to execute.
+  --host <host>      Demo-server bind host (default 127.0.0.1).
+  --port <port>      Demo-server port (default 4318).
+
+Examples:
+  runmark quickstart
+  runmark quickstart --no-demo --run smoke
+  runmark quickstart --port 5055
 `,
   init: `runmark init
 
@@ -581,11 +639,17 @@ Examples:
   run: `runmark run
 
 Usage:
-  runmark run --request <id> [--env <id>] [--input key=value] [--reporter json[:path]] [--project-root <path>]
-  runmark run --run <id> [--env <id>] [--input key=value] [--reporter json[:path]] [--project-root <path>]
+  runmark run --request <id> [--env <id>] [--input key=value] [--reporter <spec>]... [--project-root <path>]
+  runmark run --run <id> [--env <id>] [--input key=value] [--reporter <spec>]... [--project-root <path>]
 
-Reporter:
-  json[:path]  Write the execution result as JSON. Without a path, the default target is runmark/artifacts/reports/run.json under the project root.
+Reporter (repeatable; spec is <format>[:path]):
+  json[:path]     Full execution result as JSON.
+  summary[:path]  Human-friendly Markdown summary (also always written to runmark/artifacts/history/<id>/summary.md).
+  junit[:path]    JUnit XML for test aggregators.
+  tap[:path]      TAP 13 stream.
+  github[:path]   GitHub Actions log-command annotations.
+
+Without an explicit path, artifacts are written to runmark/artifacts/reports/<sessionId>.<ext>.
 
 Exit codes:
   0 success
@@ -596,7 +660,7 @@ Exit codes:
 
 Examples:
   runmark run --run smoke
-  runmark run --run smoke --reporter json
+  runmark run --run smoke --reporter junit --reporter summary
   runmark run --request ping --input userId=123
 `,
   cancel: `runmark cancel
@@ -775,33 +839,64 @@ function normalizeHelpTopic(argv: string[]): string {
   return command in helpByTopic ? command : "global";
 }
 
-// F1: CI reporter. Minimal JSON reporter supported in this slice.
-// Format: --reporter json:./path.json  (shorthand `json` writes to runmark/artifacts/reports/run.json)
-// Additional formats (junit, tap, github) ship in follow-up work.
-/** Write an optional reporter artifact for CI or automation consumers. */
+// WS4: CI reporter. Supports json, summary (markdown), junit, tap, and github
+// formats. Spec is `<format>[:path]`; repeat --reporter to emit multiple.
+// Without an explicit path, writes to runmark/artifacts/reports/<defaultBase>.<ext>.
+/** Write zero or more reporter artifacts for CI or automation consumers. */
 async function maybeWriteReporter(
-  spec: string | undefined,
+  specs: string[] | undefined,
   result: unknown,
 ): Promise<void> {
-  if (!spec) return;
+  if (!specs || specs.length === 0) return;
+  if (!isExecutionResultShape(result)) return;
+  const typedResult = result as ExecutionResult;
   const { writeFile, mkdir } = await import("node:fs/promises");
   const { dirname, resolve: resolvePath } = await import("node:path");
-  const [rawFormat, rawPath] = spec.split(":", 2);
-  const format = (rawFormat ?? "json").toLowerCase();
-  if (format !== "json") {
-    process.stderr.write(
-      `[runmark] --reporter=${format} is not yet implemented; only 'json' ships in this release. Skipping.\n`,
+  const { formatReporter } = await import("@exit-zero-labs/runmark-execution");
+  const baseDir = resolveReporterBaseDir(typedResult);
+  const supportedFormats = new Set<ReporterFormat>([
+    "json",
+    "summary",
+    "junit",
+    "tap",
+    "github",
+  ]);
+  for (const spec of specs) {
+    const [rawFormat, rawPath] = spec.split(":", 2);
+    const format = (rawFormat ?? "json").toLowerCase();
+    if (!supportedFormats.has(format as ReporterFormat)) {
+      process.stderr.write(
+        `[runmark] --reporter=${format} is not recognized. Expected one of ${[...supportedFormats].join(", ")}. Skipping.\n`,
+      );
+      continue;
+    }
+    const artifact = formatReporter(format as ReporterFormat, typedResult);
+    const defaultName = typedResult.session.sessionId ?? artifact.defaultBaseName;
+    const target = resolvePath(
+      baseDir,
+      rawPath && rawPath.length > 0
+        ? rawPath
+        : `runmark/artifacts/reports/${defaultName}.${artifact.extension}`,
     );
-    return;
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, artifact.content, "utf8");
+    process.stderr.write(
+      `[runmark] wrote ${artifact.format} reporter to ${target}\n`,
+    );
   }
-  const baseDir = resolveReporterBaseDir(result);
-  const target = resolvePath(
-    baseDir,
-    rawPath && rawPath.length > 0 ? rawPath : "runmark/artifacts/reports/run.json",
+}
+
+type ReporterFormat = "json" | "summary" | "junit" | "tap" | "github";
+
+function isExecutionResultShape(
+  value: unknown,
+): value is { session: unknown; diagnostics: unknown } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "session" in value &&
+    "diagnostics" in value
   );
-  await mkdir(dirname(target), { recursive: true });
-  await writeFile(target, `${JSON.stringify(result, null, 2)}\n`, "utf8");
-  process.stderr.write(`[runmark] wrote JSON reporter to ${target}\n`);
 }
 
 /** Minimal flag parser for the published CLI surface. */
@@ -858,7 +953,7 @@ function parseArgs(argv: string[]): {
   };
 }
 
-const booleanFlagNames = new Set(["dry-run", "reports", "secrets"]);
+const booleanFlagNames = new Set(["dry-run", "reports", "secrets", "no-demo"]);
 
 function flagValuePlaceholder(flagName: string): string {
   switch (flagName) {
@@ -1160,6 +1255,85 @@ function writeDiagnostics(diagnostics: Diagnostic[]): void {
   }
 
   process.stderr.write(`${formatCliDiagnostics(diagnostics)}\n`);
+}
+
+/** Emit a one-line human hint to stderr so stdout stays machine-parseable. */
+function writeStderrHint(message: string): void {
+  process.stderr.write(`[runmark] ${message}\n`);
+}
+
+function writeRunHint(
+  result: { session: { sessionId: string; state: string } },
+  label: string,
+): void {
+  const { state, sessionId } = result.session;
+  if (state === "completed") {
+    writeStderrHint(
+      `✓ ${label} completed. Inspect: runmark session show ${sessionId}`,
+    );
+    return;
+  }
+  if (state === "paused") {
+    writeStderrHint(
+      `⏸  ${label} paused. Inspect: runmark session show ${sessionId} — resume: runmark resume ${sessionId}`,
+    );
+    return;
+  }
+  if (state === "failed") {
+    writeStderrHint(
+      `✗ ${label} failed. Inspect: runmark session show ${sessionId} — resume after fix: runmark resume ${sessionId}`,
+    );
+    return;
+  }
+  writeStderrHint(`${label} finished with state=${state} (session ${sessionId}).`);
+}
+
+function writeQuickstartHint(result: {
+  initialized: boolean;
+  rootDir: string;
+  runId: string;
+  demoBaseUrl?: string | undefined;
+  execution: { session: { sessionId: string; state: string } };
+}): void {
+  if (result.initialized) {
+    writeStderrHint(`✓ scaffolded project at ${result.rootDir}`);
+  }
+  if (result.demoBaseUrl) {
+    writeStderrHint(`✓ demo server ran on ${result.demoBaseUrl}`);
+  }
+  writeRunHint(result.execution, `run ${result.runId}`);
+}
+
+/**
+ * Pick the sole run for a project when the user omits --request/--run.
+ *
+ * Zero runs or more than one run both exit with a helpful, actionable error so
+ * users never have to guess which run the CLI is about to execute.
+ */
+async function resolveSoleRunId(
+  projectRoot: string | undefined,
+  commandName: string,
+): Promise<string> {
+  const listing = await listProjectDefinitions({ projectRoot });
+  if (listing.runs.length === 0) {
+    throw new RunmarkError(
+      "NO_RUNS_DEFINED",
+      `No runs found. Create one under runmark/runs/ or pass --request <id>. Example: runmark ${commandName} --run smoke`,
+      { exitCode: exitCodes.validationFailure },
+    );
+  }
+  if (listing.runs.length === 1) {
+    // biome-ignore lint/style/noNonNullAssertion: length-checked above
+    const soleRun = listing.runs[0]!;
+    writeStderrHint(`Using the only run defined: ${soleRun.id}`);
+    return soleRun.id;
+  }
+  const runList = listing.runs.map((run) => run.id).join(", ");
+  throw new RunmarkError(
+    "RUN_TARGET_AMBIGUOUS",
+    `Multiple runs defined (${runList}). Pass --run <id> to pick one.`,
+    { exitCode: exitCodes.validationFailure },
+  );
 }
 
 async function main(): Promise<void> {
