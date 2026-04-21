@@ -512,6 +512,119 @@ test("CLI run with no target picks the sole run and errors clearly when ambiguou
   }
 });
 
+test("CLI eval scaffolds, runs a JSONL dataset, and writes aggregated summary", async () => {
+  const { server, baseUrl } = await startDemoServer({ port: 0 });
+  const projectRoot = await mkdtemp(join(tmpdir(), "runmark-eval-"));
+
+  try {
+    const initResult = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "init",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(initResult.code, 0, initResult.stderr);
+
+    const envPath = join(projectRoot, "runmark", "env", "dev.env.yaml");
+    const envYaml = await readFile(envPath, "utf8");
+    await writeFile(
+      envPath,
+      envYaml.replace(/baseUrl: .*/, `baseUrl: ${baseUrl}`),
+      "utf8",
+    );
+
+    // Scaffold an eval via the CLI.
+    const newEval = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "new",
+      "eval",
+      "ping-matrix",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(newEval.code, 0, newEval.stderr);
+
+    // Point the eval at the init-scaffolded smoke run and provide a JSONL dataset.
+    const evalPath = join(
+      projectRoot,
+      "runmark",
+      "evals",
+      "ping-matrix.eval.yaml",
+    );
+    await writeFile(
+      evalPath,
+      [
+        "kind: eval",
+        "schemaVersion: 1",
+        "title: Ping matrix",
+        "target:",
+        "  run: smoke",
+        "env: dev",
+        "dataset:",
+        "  kind: jsonl",
+        "  path: datasets/ping.jsonl",
+        "concurrency: 2",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    const datasetDir = join(projectRoot, "runmark", "datasets");
+    await mkdir(datasetDir, { recursive: true });
+    await writeFile(
+      join(datasetDir, "ping.jsonl"),
+      [
+        JSON.stringify({ baseUrl }),
+        JSON.stringify({ baseUrl }),
+        JSON.stringify({ baseUrl }),
+      ].join("\n"),
+      "utf8",
+    );
+
+    const listEvals = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "eval",
+      "list",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(listEvals.code, 0, listEvals.stderr);
+    const listed = JSON.parse(listEvals.stdout);
+    assert.equal(listed.evals.length, 1);
+    assert.equal(listed.evals[0].id, "ping-matrix");
+    assert.equal(listed.evals[0].targetKind, "run");
+    assert.equal(listed.evals[0].targetId, "smoke");
+
+    const runEvalRes = await runNodeProcess(process.execPath, [
+      cliEntrypoint,
+      "eval",
+      "run",
+      "ping-matrix",
+      "--project-root",
+      projectRoot,
+    ]);
+    assert.equal(runEvalRes.code, 0, runEvalRes.stderr);
+    const evalResult = JSON.parse(runEvalRes.stdout);
+    assert.equal(evalResult.totals.rows, 3);
+    assert.equal(evalResult.totals.passed, 3);
+    assert.equal(evalResult.totals.failed, 0);
+    assert.equal(evalResult.rows.length, 3);
+    assert.match(runEvalRes.stderr, /3\/3 passed/);
+
+    const summaryJson = JSON.parse(
+      await readFile(join(evalResult.artifactsDir, "summary.json"), "utf8"),
+    );
+    assert.equal(summaryJson.evalId, "ping-matrix");
+    const summaryMd = await readFile(
+      join(evalResult.artifactsDir, "summary.md"),
+      "utf8",
+    );
+    assert.match(summaryMd, /# Eval `ping-matrix`/);
+  } finally {
+    await new Promise((resolveClose) => server.close(() => resolveClose()));
+    await rm(projectRoot, { recursive: true, force: true });
+  }
+});
+
 test("CLI new, edit, and lint scaffold definitions and resolve ids", async () => {
   const projectRoot = await mkdtemp(join(tmpdir(), "runmark-new-"));
 

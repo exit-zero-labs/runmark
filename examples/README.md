@@ -22,6 +22,7 @@ runmark demo start
 | [`ecommerce-checkout`](ecommerce-checkout) | a multi-step checkout flow with API-key auth, body templates, and extracted IDs | `testing/runmark/runmark.examples.test.mjs` |
 | [`incident-runbook`](incident-runbook) | ops-style parallel diagnostics, a human pause, and a safe resume into mutation | `testing/runmark/runmark.examples.test.mjs` |
 | [`failure-recovery`](failure-recovery) | failed sessions, request history, and retrying work with `resume` after an upstream recovers | `testing/runmark/runmark.examples.test.mjs` |
+| [`eval-basic`](eval-basic) | dataset-driven `runmark eval run` with a small JSONL matrix against the demo server | — (covered inline by `runmark.e2e.test.mjs` eval test) |
 
 Then use any example directly with `--project-root`:
 

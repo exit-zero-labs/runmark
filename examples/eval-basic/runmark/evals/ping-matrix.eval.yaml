@@ -1,0 +1,10 @@
+kind: eval
+schemaVersion: 1
+title: Ping matrix
+target:
+  run: smoke
+env: dev
+dataset:
+  kind: jsonl
+  path: datasets/ping.jsonl
+concurrency: 2

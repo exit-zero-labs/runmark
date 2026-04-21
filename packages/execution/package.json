@@ -44,6 +44,7 @@
     "@exit-zero-labs/runmark-definitions": "workspace:*",
     "@exit-zero-labs/runmark-http": "workspace:*",
     "@exit-zero-labs/runmark-runtime": "workspace:*",
-    "@exit-zero-labs/runmark-shared": "workspace:*"
+    "@exit-zero-labs/runmark-shared": "workspace:*",
+    "yaml": "^2.8.3"
   }
 }

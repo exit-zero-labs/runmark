@@ -24,11 +24,13 @@ import {
   getSessionState,
   initProject,
   installSignalCancelHandler,
+  listEvalDefinitions,
   listProjectDefinitions,
   listSessionArtifacts,
   quickstartProject,
   readSessionArtifact,
   resumeSessionRun,
+  runEval,
   runRequest,
   runRun,
   scaffoldDefinition,
@@ -140,11 +142,12 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       kindArg !== "request" &&
       kindArg !== "run" &&
       kindArg !== "env" &&
-      kindArg !== "block"
+      kindArg !== "block" &&
+      kindArg !== "eval"
     ) {
       throw new RunmarkError(
         "NEW_KIND_UNKNOWN",
-        `Unknown kind "${kindArg}". Expected one of: request, run, env, block.`,
+        `Unknown kind "${kindArg}". Expected one of: request, run, env, block, eval.`,
         { exitCode: exitCodes.validationFailure },
       );
     }
@@ -214,6 +217,42 @@ export async function runCli(argv = process.argv.slice(2)): Promise<number> {
       (diagnostic) => diagnostic.level === "error",
     );
     return hasErrors ? exitCodes.validationFailure : exitCodes.success;
+  }
+
+  if (command === "eval") {
+    const sub = parsedArgs.positionals[1];
+    if (sub === "list") {
+      const listed = await listEvalDefinitions({
+        ...(projectRoot ? { projectRoot } : {}),
+      });
+      process.stdout.write(`${JSON.stringify(listed, null, 2)}\n`);
+      return exitCodes.success;
+    }
+    if (sub === "run") {
+      const evalId = parsedArgs.positionals[2];
+      if (!evalId) {
+        throw new RunmarkError(
+          "EVAL_ID_REQUIRED",
+          "Use runmark eval run <evalId>.",
+          { exitCode: exitCodes.validationFailure },
+        );
+      }
+      const result = await runEval(evalId, {
+        ...(projectRoot ? { projectRoot } : {}),
+      });
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      writeStderrHint(
+        `eval ${evalId}: ${result.totals.passed}/${result.totals.rows} passed → ${result.artifactsDir}/summary.md`,
+      );
+      return result.totals.failed > 0
+        ? exitCodes.executionFailure
+        : exitCodes.success;
+    }
+    throw new RunmarkError(
+      "EVAL_SUBCOMMAND_REQUIRED",
+      "Use runmark eval list or runmark eval run <evalId>.",
+      { exitCode: exitCodes.validationFailure },
+    );
   }
 
   if (command === "list") {
@@ -611,9 +650,11 @@ Usage:
   runmark quickstart [--no-demo] [--run <id>] [--host <host>] [--port <port>] [--project-root <path>]
   runmark demo start [--host <host>] [--port <port>]
   runmark init [--project-root <path>]
-  runmark new <request|run|env|block> <id> [--block-kind headers|auth] [--project-root <path>]
+  runmark new <request|run|env|block|eval> <id> [--block-kind headers|auth] [--project-root <path>]
   runmark edit <definitionId> [--project-root <path>]
   runmark lint [--project-root <path>]
+  runmark eval list [--project-root <path>]
+  runmark eval run <evalId> [--project-root <path>]
   runmark list <requests|runs|envs|sessions> [--project-root <path>]
   runmark validate [--project-root <path>]
   runmark describe --request <id> [--env <id>] [--input key=value] [--project-root <path>]
@@ -747,6 +788,26 @@ What it does:
 
 Examples:
   runmark lint
+`,
+  eval: `runmark eval
+
+Usage:
+  runmark eval list [--project-root <path>]
+  runmark eval run <evalId> [--project-root <path>]
+
+What it does:
+  Runs a tracked eval definition (runmark/evals/<id>.eval.yaml) by fanning
+  out one session per dataset row with row-scoped variable overrides. Each
+  session still runs its request's own expect assertions. Writes an
+  aggregated summary to runmark/artifacts/evals/<evalId>/<ts>/summary.{json,md}.
+
+Datasets:
+  Supported kinds are jsonl and csv. Paths are relative to runmark/.
+
+Examples:
+  runmark new eval ping-matrix
+  runmark eval list
+  runmark eval run ping-matrix
 `,
   list: `runmark list
 

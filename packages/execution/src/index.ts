@@ -175,6 +175,12 @@ export type {
   ScaffoldOptions,
   ScaffoldResult,
 } from "./scaffold.js";
+export { listEvalDefinitions, runEval } from "./evals.js";
+export type {
+  EvalListEntry,
+  EvalRowOutcome,
+  EvalRunResult,
+} from "./evals.js";
 export type { EngineOptions, InitProjectResult } from "./types.js";
 
 /** Discover tracked definitions plus persisted runtime sessions for a project. */

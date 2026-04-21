@@ -23,7 +23,7 @@ import type { EngineOptions } from "./types.js";
 const schemaBaseUrl =
   "https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas";
 
-export type ScaffoldKind = "request" | "run" | "env" | "block";
+export type ScaffoldKind = "request" | "run" | "env" | "block" | "eval";
 
 export interface ScaffoldOptions extends EngineOptions {
   kind: ScaffoldKind;
@@ -91,6 +91,14 @@ export async function scaffoldDefinition(
           : renderAuthBlockTemplate(id),
       );
     }
+    case "eval":
+      return writeDefinition(
+        rootDir,
+        "eval",
+        id,
+        ["evals", `${idToRelativePath(id)}.eval.yaml`],
+        renderEvalTemplate(id),
+      );
   }
 }
 
@@ -211,6 +219,23 @@ function renderAuthBlockTemplate(id: string): string {
     "scheme: bearer",
     "values:",
     "  token: '{{secrets.apiToken}}'",
+    "",
+  ].join("\n");
+}
+
+function renderEvalTemplate(id: string): string {
+  return [
+    "# yaml-language-server: $schema=https://raw.githubusercontent.com/exit-zero-labs/runmark/main/packages/contracts/schemas/eval.schema.json",
+    "kind: eval",
+    "schemaVersion: 1",
+    `title: ${humanizeId(id)}`,
+    "target:",
+    "  run: TODO",
+    "env: dev",
+    "dataset:",
+    "  kind: jsonl",
+    `  path: datasets/${id}.jsonl`,
+    "concurrency: 1",
     "",
   ].join("\n");
 }
